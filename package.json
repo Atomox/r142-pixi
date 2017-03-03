@@ -1,0 +1,14 @@
+{
+  "name": "pixi",
+  "version": "1.0.0",
+  "description": "A testing ground for pixi animations.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "bhelmer",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.0"
+  }
+}
