@@ -17,19 +17,13 @@ loadTexture(null, "images/R142.png")
   console.log('Calling setup for', url);
   train_4_car = r142.setupTrain(url);
 
-  /**
-   
-
-    @TODO
-      
-
-
-   */
+  // Schedule a train.
   train_4_car.setSchedule([
-    {velocity: [20,0]},
-    {decel: [0, .1]},
-    {unload: [10, .05]},
-    {acel: [20, .05]}
+    {	velocity: [20,0]	},
+    {	decel: [0, .1]		},
+    {	unload: [10, .05]	},
+    {	load: [10, .05]		},
+    {	acel: [20, .05]		}
   ]);
 
 }).then(() => {
@@ -46,32 +40,7 @@ loadTexture(null, "images/R142.png")
 
 function play() {
 
-  // get status.
-  if (train_4_car.status == 'waiting') {
-    train_4_car.velocity(20,0);
-    train_4_car.decel(0, .1);
-  }
-  else if (train_4_car.status == 'decel') {
-    if (train_4_car.continue() === false) {
-      // start next action.
-      train_4_car.unload(10, .05);
-    }
-  }
-  else if (train_4_car.status == 'unload') {
-    if (train_4_car.continue() === false) {
-      // start next action.
-      train_4_car.acel(20, .05);
-    }
-  }
-  else if (train_4_car.status == 'acel') {
-    if (train_4_car.continue() === false) {
-      // start next action.
-      console.log('See ya.');
-    }
-  }
-  else {
-    // do nothing?
-  }
+	train_4_car.update();
 
   return true;
 }
@@ -82,7 +51,7 @@ function play() {
 
 function initPixi() {
   if (!PIXI.utils.isWebGLSupported()){ type = "canvas" }
-  PIXI.utils.sayHello(type)  
+  PIXI.utils.sayHello(type);
 }
 
 function initPixiRenderer() {

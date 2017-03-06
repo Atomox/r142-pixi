@@ -3,6 +3,7 @@ var r142 = (function r142Factory() {
   function Train() {
     this.container = new PIXI.Container();
     this.status = 'waiting';
+    this.scheduled_action = null;
   }
 
   Train.prototype.add = function(item) {
@@ -17,6 +18,53 @@ var r142 = (function r142Factory() {
     this.schedule = schedule;
   }
 
+  Train.prototype.nextAction = function() {
+
+    if (this.scheduled_action == null) {
+      this.scheduled_action = 0;
+    }
+    else {
+      this.scheduled_action++;
+    }
+
+    if (typeof this.schedule === 'object' && this.schedule !== null) {
+      if (typeof this.schedule[this.scheduled_action] !== 'undefined') {
+        for (i in this.schedule[this.scheduled_action]) {
+          this.status = i;
+          var args = this.schedule[this.scheduled_action][i];
+
+          switch (this.status) {
+
+            case 'velocity':
+              this.velocity.apply(this, args);
+              break;
+
+            case 'unload':
+              this.unload.apply(this, args);
+              break;
+
+            case 'load':
+              this.load.apply(this, args);
+              break;
+
+            case 'decel':
+              this.decel.apply(this, args);
+              break;
+
+            case 'acel':
+              this.acel.apply(this, args);
+              break;
+
+            default:
+              console.log('Unknown Action: ', i);
+              this.status = false;
+          }
+          break;
+        }
+      }
+    }
+  }
+
   Train.prototype.status = function() {
     return this.status;
   }
@@ -24,17 +72,27 @@ var r142 = (function r142Factory() {
   Train.prototype.velocity = function(x,y) {
     this.container.vx = x;
     this.container.vy = y;
+    this.status = 'velocity';
   }
 
   Train.prototype.unload = function(final, step) {
+    this.velocity(0,0);
     this.status = 'unload';
     this.action = {
       type: 'unload',
       final: final,
       step: step
     };
+  }
 
+  Train.prototype.load = function(final, step) {
     this.velocity(0,0);
+    this.status = 'load';
+    this.action = {
+      type: 'load',
+      final: final,
+      step: step
+    };
   }
 
   Train.prototype.decel = function(final, step) {
@@ -76,7 +134,7 @@ var r142 = (function r142Factory() {
         this.container.vx += this.action.step;
       }
     }
-    else if (this.status == 'unload') {
+    else if (this.status == 'unload' || this.status == 'load') {
       if (this.action.final <= 0) {
         this.status = 'idle';
       }
@@ -84,12 +142,32 @@ var r142 = (function r142Factory() {
         this.action.final -= this.action.step;
       }
     }
+    else if (this.status == 'velocity'){
+      this.status = 'idle';
+    }
+    else {
+      console.log('Continue: Unknown action: ', this.status);
+    }
+
 
     this.container.vy = 0;
     this.container.x += this.container.vx;
     this.container.y += this.container.vy;
 
     return (this.status === 'idle') ? false : true;
+  }
+
+  Train.prototype.update = function() {
+    // get status.
+    if (this.status == 'waiting' || this.status == 'idle') {
+      this.nextAction();
+    }
+    else if (this.status !== false) {
+      this.continue();
+    }
+    else {
+      console.log('Nope.');
+    }
   }
 
 	function setupCar(url, car_num, x, y) {
