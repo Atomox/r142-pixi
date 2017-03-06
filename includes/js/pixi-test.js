@@ -1,104 +1,129 @@
-var type = "WebGL"
-
-if(!PIXI.utils.isWebGLSupported()){
-  type = "canvas"
-}
-
-PIXI.utils.sayHello(type)
+var type = "WebGL",
+  stage, renderer,
+  state = play;
 
 
-//Create the renderer
-
-//Create a container object called the `stage`, and a renderer.
-var stage = new PIXI.Container(),
-		renderer = PIXI.autoDetectRenderer(512, 256,
-			{antialias: false, transparent: false, resolution: 1}
-		);
-
-// Style and resize.
-renderer.view.style.border = "1px dashed black";
-renderer.backgroundColor = 0xFFFFFF;
-renderer.autoResize = true;
-renderer.resize(1024, 512);
-
-// Add the canvas to the HTML document
-document.body.appendChild(renderer.view);
-
-var r142 = [],
-		train_4_car = null;
-
-// Load an image.
-PIXI.loader
-  .add("images/R142.png")
-  .load(setup);
-
-function setup() {
-
-	train_4_car = new PIXI.Container();
-
-	for (i = 0; i < 4; i++) {
-  	//This code will run when the loader has finished loading the image.
-  	r142.push(setupCar("images/R142.png", i+1, 32, 64));
-  	train_4_car.addChild(r142[i]);
-	}
-
-  var message = new PIXI.Text(
-	  "Hello Pixi!",
-	  {fontFamily: "Helevetica", fontSize: 64, fill: "gray"}
-	);
-	message.position.set(256, 64);
-	stage.addChild(message);
 
 
-  stage.addChild(train_4_car);
-
-  gameLoop();
-}
-
-function setupCar(url, car_num, x, y) {
-	var my_car = new PIXI.Sprite(
-    PIXI.loader.resources[url].texture
-  );
-
-  //  r142[1].visible = true;
-
-	// Scaling.
-	//	r142.width = 320;
-	//	r142.height = 64;
-	my_car.scale.x = 0.85;
-	my_car.scale.y = 0.85;
-
-  x = ((i * my_car.width) + x);
-
-  // Positioning.
-  my_car.position.set(x,y);
-	//  my_car.x = 96;
-	//  my_car.y = 64;
+initPixi();
+initPixiRenderer();
 
 
-	my_car.vx = 0;
-	my_car.vy = 0;
+var car = [],
+	train_4_car = null;
 
-	return my_car;
-}
+loadTexture(null, "images/R142.png")
+.then(function(url) {
+  console.log('Calling setup for', url);
+  train_4_car = r142.setupTrain(url);
 
-var state = play;
+  /**
+   
 
-function gameLoop() {
-	requestAnimationFrame(gameLoop);
+    @TODO
+      
 
-	state();
 
-	renderer.render(stage);
-}
+   */
+  train_4_car.setSchedule([
+    {velocity: [20,0]},
+    {decel: [0, .1]},
+    {unload: [10, .05]},
+    {acel: [20, .05]}
+  ]);
+
+}).then(() => {
+
+    var message = new PIXI.Text("R142.", {fontFamily: "Helevetica", fontSize: 64, fill: "gray"});
+    message.position.set(256, 0);
+    stage.addChild(message);
+
+    gameLoop();
+});
+
+
+
 
 function play() {
-	train_4_car.vx = 1;
-	train_4_car.vy = 0;
 
-	train_4_car.x += train_4_car.vx;
-	train_4_car.y += train_4_car.vy;
+  // get status.
+  if (train_4_car.status == 'waiting') {
+    train_4_car.velocity(20,0);
+    train_4_car.decel(0, .1);
+  }
+  else if (train_4_car.status == 'decel') {
+    if (train_4_car.continue() === false) {
+      // start next action.
+      train_4_car.unload(10, .05);
+    }
+  }
+  else if (train_4_car.status == 'unload') {
+    if (train_4_car.continue() === false) {
+      // start next action.
+      train_4_car.acel(20, .05);
+    }
+  }
+  else if (train_4_car.status == 'acel') {
+    if (train_4_car.continue() === false) {
+      // start next action.
+      console.log('See ya.');
+    }
+  }
+  else {
+    // do nothing?
+  }
+
+  return true;
 }
 
 
+
+
+
+function initPixi() {
+  if (!PIXI.utils.isWebGLSupported()){ type = "canvas" }
+  PIXI.utils.sayHello(type)  
+}
+
+function initPixiRenderer() {
+  // Create a container object called the `stage`, and a renderer.
+  stage = new PIXI.Container();
+  renderer = PIXI.autoDetectRenderer(512, 256,
+    {antialias: false, transparent: false, resolution: 1}
+  );
+
+  // Style and resize.
+  renderer.view.style.border = "1px dashed black";
+  renderer.backgroundColor = 0xFFFFFF;
+  renderer.autoResize = true;
+  renderer.resize(1392, 512);
+
+  // Add the canvas to the HTML document
+  document.body.appendChild(renderer.view);
+}
+
+function loadTexture(name, url) {
+  return new Promise(function(resolve, reject) {
+    // Load an image.
+    PIXI.loader.add(url).load(function(){ 
+      console.log(url, 'loaded');
+      resolve(url); 
+    });
+
+    /**
+       @TODO
+         reject()?
+     */
+  });
+}
+
+function gameLoop() {
+  requestAnimationFrame(gameLoop);
+
+  if (!state()) {
+    return false;
+  }
+
+  renderer.render(stage);
+}
 
