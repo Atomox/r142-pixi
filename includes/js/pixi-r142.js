@@ -1,9 +1,14 @@
+'use strict';
+
 var r142 = (function r142Factory() {
 
-  function Train() {
+  function Train(url) {
     this.container = new PIXI.Container();
     this.status = 'waiting';
     this.scheduled_action = null;
+    this.direction = 'e';
+
+    initTrain.call(this,url);
   }
 
   Train.prototype.add = function(item) {
@@ -12,6 +17,20 @@ var r142 = (function r142Factory() {
 
   Train.prototype.container = function() {
     return this.container;
+  }
+
+  Train.prototype.setDirection = function(direction) {
+    direction = direction.toLowerCase();
+    if (['n', 's', 'e', 'w'].indexOf(direction) === -1) {
+      console.warn('Invalid direction:', direction);
+      return false;
+    }
+
+    this.direction = direction;
+  }
+
+  Train.prototype.setPosition = function(x,y) {
+    this.container.position.set(x,y);
   }
 
   Train.prototype.setSchedule = function(schedule) {
@@ -29,7 +48,7 @@ var r142 = (function r142Factory() {
 
     if (typeof this.schedule === 'object' && this.schedule !== null) {
       if (typeof this.schedule[this.scheduled_action] !== 'undefined') {
-        for (i in this.schedule[this.scheduled_action]) {
+        for (var i in this.schedule[this.scheduled_action]) {
           this.status = i;
           var args = this.schedule[this.scheduled_action][i];
 
@@ -151,7 +170,7 @@ var r142 = (function r142Factory() {
 
 
     this.container.vy = 0;
-    this.container.x += this.container.vx;
+    this.container.x += (this.direction == 'w') ? -this.container.vx : this.container.vx;
     this.container.y += this.container.vy;
 
     return (this.status === 'idle') ? false : true;
@@ -170,25 +189,20 @@ var r142 = (function r142Factory() {
     }
   }
 
-	function setupCar(url, car_num, x, y) {
-		var my_car = new PIXI.Sprite(
-	    PIXI.loader.resources[url].texture
-	  );
+	function setupCar(url, car_num) {
+		var my_car = new PIXI.Sprite(PIXI.loader.resources[url].texture);
+
+    var x = 0;
 
 	  //  r142[1].visible = true;
-
-		// Scaling.
-		//	r142.width = 320;
-		//	r142.height = 64;
 		my_car.scale.x = .85;
 		my_car.scale.y = .85;
 
-	  x = ((i * my_car.width) + x);
+	  x = ((car_num * my_car.width) + x);
 
 	  // Positioning.
-	  my_car.position.set(x,y);
-		//  my_car.x = 96;
-		//  my_car.y = 64;
+	  my_car.position.set(x,0);
+
 
 
 		my_car.vx = 0;
@@ -197,26 +211,22 @@ var r142 = (function r142Factory() {
 		return my_car;
 	}
 
-  function setupTrain(url) {
+  function initTrain(url) {
 
     console.log('Setup for', url);
 
-    train_4_car = new Train();
-
-    for (i = 0; i < 4; i++) {
+    for (var i = 0; i < 4; i++) {
         //This code will run when the loader has finished loading the image.
-        car.push(r142.setupCar(url, i+1, -2048, 64));
-        train_4_car.add(car[i]);
+        car.push(setupCar.call(this, url, i+1));
+
+        this.setPosition(-2048,0);
+        this.add(car[i]);
     }
 
-    stage.addChild(train_4_car.container);
-
-    return train_4_car;
+    stage.addChild(this.container);
   }
 
   return {
-    setupCar: setupCar,
-    setupTrain: setupTrain,
     Train: Train
   };
 })();

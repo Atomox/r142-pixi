@@ -1,38 +1,78 @@
+'use strict';
+
 var type = "WebGL",
   stage, renderer,
-  state = play;
+  state = play,
+  screen = {
+  	width: 1392,
+  	height: 384
+  };
 
+var schedule = {
+	normal: [
+		    {	velocity: [20,0]	},
+		    {	decel: [0, .1]		},
+		    {	unload: [10, .05]	},
+		    {	load: [10, .05]		},
+		    {	acel: [20, .05]		}
+		  ],
+};
 
-
-
+// Init Pixi.
 initPixi();
-initPixiRenderer();
+initPixiRenderer(screen.width, screen.height);
 
 
 var car = [],
-	train_4_car = null;
+	train_4_car = null,
+	trains_east = [],
+	trains_west = [],
+	east_bound = 0,
+	west_bound = 0,
+	station = null;
 
-loadTexture(null, "images/R142.png")
-.then(function(url) {
-  console.log('Calling setup for', url);
-  train_4_car = r142.setupTrain(url);
 
-  // Schedule a train.
-  train_4_car.setSchedule([
-    {	velocity: [20,0]	},
-    {	decel: [0, .1]		},
-    {	unload: [10, .05]	},
-    {	load: [10, .05]		},
-    {	acel: [20, .05]		}
-  ]);
+document.addEventListener("DOMContentLoaded",function() {
 
-}).then(() => {
+	station = new rstation.Station('R142', 2);
 
-    var message = new PIXI.Text("R142.", {fontFamily: "Helevetica", fontSize: 64, fill: "gray"});
-    message.position.set(256, 0);
-    stage.addChild(message);
+	station.setTrack(0,'w',0,64, 1560,64);
+	station.setTrack(1,'e',0,256, -1500, 256);
 
-    gameLoop();
+	loadTexture(null, "images/station_basic.json")   //tile_floor.png")
+	.then((url) => {
+		station.initPlatform(url,0,screen.width, 156,256);
+		station.open();
+	})
+	.then(() => {
+		loadTexture(null, "images/R142.png")
+		.then(function(url) {
+
+			/**
+
+			   @TODO
+					
+					This doesn't init for multiple trains.
+			 */
+		  for (var i = 0; i < 1; i++) {
+		  	trains_east[i] = new r142.Train(url);
+		  	trains_east[i].setSchedule(schedule.normal);
+		  }
+		  /**
+		  for (var i = 0; i < 1; i++) {
+		  	trains_west[i] = new r142.Train(url);
+		  	trains_west[i].setSchedule(schedule.normal);
+		  }*/
+
+		}).then(() => {
+
+		    var message = new PIXI.Text("R142.", {fontFamily: "Helevetica", fontSize: 64, fill: "gray"});
+		    message.position.set(256, 0);
+		    stage.addChild(message);
+
+		    gameLoop();
+		});
+	});
 });
 
 
@@ -40,7 +80,37 @@ loadTexture(null, "images/R142.png")
 
 function play() {
 
-	train_4_car.update();
+	// East-bound:
+	if (station.trackStatus(0) == true && typeof trains_east[east_bound] !== 'undefined') {
+		console.log('Scheduling train');
+
+	  // Schedule a train.
+	  station.scheduleTrain(0, trains_east[east_bound]);
+		east_bound++;
+	}
+	else if (station.trackStatus(0) == true) {
+		console.log('Track 0 is free');
+	}
+
+	// West-bound:
+	if (station.trackStatus(1) == true && typeof trains_west[west_bound] !== 'undefined') {
+		console.log('Scheduling train');
+
+	  // Schedule a train.
+	  station.scheduleTrain(1, trains_west[west_bound]);
+		west_bound++;
+	}
+	else if (station.trackStatus(1) == true) {
+		console.log('Track 1 is free');
+	}
+
+
+	if (typeof trains_east[east_bound-1] !== 'undefined') {
+		trains_east[east_bound-1].update();
+	}
+	if (typeof trains_west[west_bound-1] !== 'undefined') {
+		trains_west[west_bound-1].update();
+	}
 
   return true;
 }
@@ -54,10 +124,10 @@ function initPixi() {
   PIXI.utils.sayHello(type);
 }
 
-function initPixiRenderer() {
+function initPixiRenderer(width, height) {
   // Create a container object called the `stage`, and a renderer.
   stage = new PIXI.Container();
-  renderer = PIXI.autoDetectRenderer(512, 256,
+  renderer = PIXI.autoDetectRenderer(width, height,
     {antialias: false, transparent: false, resolution: 1}
   );
 
@@ -65,7 +135,7 @@ function initPixiRenderer() {
   renderer.view.style.border = "1px dashed black";
   renderer.backgroundColor = 0xFFFFFF;
   renderer.autoResize = true;
-  renderer.resize(1392, 512);
+//  renderer.resize(1392, 512);
 
   // Add the canvas to the HTML document
   document.body.appendChild(renderer.view);
