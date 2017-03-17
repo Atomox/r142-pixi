@@ -10,4 +10,4 @@ app.get('/', function(req, resp, next) {
   resp.sendFile(__dirname + '/html/index.html');
 });
 
-server.listen('4200');
+server.listen('8000');

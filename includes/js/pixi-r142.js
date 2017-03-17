@@ -29,7 +29,12 @@ var r142 = (function r142Factory() {
     this.direction = direction;
   }
 
-  Train.prototype.setPosition = function(x,y) {
+  Train.prototype.setPosition = function(x,y, y_start_bottom) {
+    // Offset y by the height of the container.
+    if (typeof y_start_bottom !== 'undefined' && y_start_bottom === true) {
+      y = y-this.container.height;
+    }
+
     this.container.position.set(x,y);
   }
 

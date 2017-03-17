@@ -95,7 +95,7 @@ var rstation = (function stationFactory() {
 		}
 
 		train.setDirection(this.tracks[track].direction);
-		train.setPosition(this.tracks[track].spawn_x, this.tracks[track].spawn_y);
+		train.setPosition(this.tracks[track].spawn_x, this.tracks[track].spawn_y, true);
 	}
 
 		Station.prototype.trackStatus = function(track) {

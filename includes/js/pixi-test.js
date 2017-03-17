@@ -36,8 +36,8 @@ document.addEventListener("DOMContentLoaded",function() {
 
 	station = new rstation.Station('R142', 2);
 
-	station.setTrack(0,'w',0,64, 1560,64);
-	station.setTrack(1,'e',0,256, -1500, 256);
+	station.setTrack(0,'w',0,64, 1560,156);
+	station.setTrack(1,'e',0,275, -1500, 275);
 
 	loadTexture(null, "images/station_basic.json")   //tile_floor.png")
 	.then((url) => {
@@ -58,11 +58,10 @@ document.addEventListener("DOMContentLoaded",function() {
 		  	trains_east[i] = new r142.Train(url);
 		  	trains_east[i].setSchedule(schedule.normal);
 		  }
-		  /**
 		  for (var i = 0; i < 1; i++) {
 		  	trains_west[i] = new r142.Train(url);
 		  	trains_west[i].setSchedule(schedule.normal);
-		  }*/
+		  }
 
 		}).then(() => {
 
