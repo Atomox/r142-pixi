@@ -58,10 +58,12 @@ document.addEventListener("DOMContentLoaded",function() {
 		  	trains_east[i] = new r142.Train(url);
 		  	trains_east[i].setSchedule(schedule.normal);
 		  }
+		  /**
 		  for (var i = 0; i < 1; i++) {
 		  	trains_west[i] = new r142.Train(url);
 		  	trains_west[i].setSchedule(schedule.normal);
 		  }
+		  */
 
 		}).then(() => {
 
