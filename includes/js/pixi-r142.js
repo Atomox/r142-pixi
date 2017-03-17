@@ -2,13 +2,13 @@
 
 var r142 = (function r142Factory() {
 
-  function Train(url) {
+  function Train(url, left, right, car_count) {
     this.container = new PIXI.Container();
     this.status = 'waiting';
     this.scheduled_action = null;
     this.direction = 'e';
 
-    initTrain.call(this,url);
+    initTrain.call(this, url, left, right, car_count);
   }
 
   Train.prototype.add = function(item) {
@@ -194,20 +194,22 @@ var r142 = (function r142Factory() {
     }
   }
 
-	function setupCar(url, car_num) {
-		var my_car = new PIXI.Sprite(PIXI.loader.resources[url].texture);
+	function setupCar(file_name, car_num) {
+
+    // Our train png.
+    var car_tex = PIXI.utils.TextureCache[file_name];
+    var my_car = new PIXI.Sprite(car_tex);
 
     var x = 0;
 
 	  //  r142[1].visible = true;
-		my_car.scale.x = .85;
-		my_car.scale.y = .85;
+//		my_car.scale.x = .85;
+//		my_car.scale.y = .85;
 
-	  x = ((car_num * my_car.width) + x);
+    x = ((car_num * my_car.width) + x);
 
-	  // Positioning.
-	  my_car.position.set(x,0);
-
+    // Positioning.
+    my_car.position.set(x,0);
 
 
 		my_car.vx = 0;
@@ -216,13 +218,15 @@ var r142 = (function r142Factory() {
 		return my_car;
 	}
 
-  function initTrain(url) {
+  function initTrain(url, left, right, car_count) {
 
     console.log('Setup for', url);
 
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < car_count; i++) {
+        var car_img = (i >= (car_count/2)) ? right : left;
+
         //This code will run when the loader has finished loading the image.
-        car.push(setupCar.call(this, url, i+1));
+        car.push(setupCar.call(this, car_img, i+1));
 
         this.setPosition(-2048,0);
         this.add(car[i]);
