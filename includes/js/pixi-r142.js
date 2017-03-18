@@ -29,10 +29,14 @@ var r142 = (function r142Factory() {
     this.direction = direction;
   }
 
-  Train.prototype.setPosition = function(x,y, y_start_bottom) {
+  Train.prototype.setPosition = function(x,y, y_start_bottom, x_start_right) {
     // Offset y by the height of the container.
     if (typeof y_start_bottom !== 'undefined' && y_start_bottom === true) {
       y = y-this.container.height;
+    }
+
+    if (typeof x_start_right !== 'undefined' && x_start_right === true) {
+      x = x-this.container.width;
     }
 
     this.container.position.set(x,y);
@@ -220,7 +224,7 @@ var r142 = (function r142Factory() {
 
   function initTrain(url, left, right, car_count) {
 
-    console.log('Setup for', url);
+    var car = [];
 
     for (var i = 0; i < car_count; i++) {
         var car_img = (i >= (car_count/2)) ? right : left;

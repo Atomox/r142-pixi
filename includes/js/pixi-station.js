@@ -9,6 +9,19 @@ var rstation = (function stationFactory() {
 	}
 
 	function initTracks(count) {
+		/**
+		 
+		  @todo 
+		 
+		 	Need a buffer distance for green vs yellow vs red signal.
+
+		 	When a train hits a yellow signal, track is available at SLOW speeds. Open track.
+
+		 	When a train hits a green signal, track is available at NORMAL speeds. Open track.
+		 
+		 */
+
+
 		var results = [];
 		for(var i = 0; i < count; i++) {
 			results[i] = {
@@ -95,7 +108,15 @@ var rstation = (function stationFactory() {
 		}
 
 		train.setDirection(this.tracks[track].direction);
-		train.setPosition(this.tracks[track].spawn_x, this.tracks[track].spawn_y, true);
+
+		// When east-bound, start the train west of the x spawn point.
+		if (this.tracks[track].direction == 'e') {
+			train.setPosition(this.tracks[track].spawn_x, this.tracks[track].spawn_y, true, true);
+		}
+		else {
+			train.setPosition(this.tracks[track].spawn_x, this.tracks[track].spawn_y, true);
+		}
+		
 	}
 
 		Station.prototype.trackStatus = function(track) {
