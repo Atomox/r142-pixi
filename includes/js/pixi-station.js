@@ -143,6 +143,9 @@ var rstation = (function stationFactory() {
 			my_stop.position.x = x;
 			my_stop.position.y = this.tracks[id].y-70 - my_stop.height;
 
+			my_stop.scale.y = .35;
+			my_stop.scale.x = .35
+
 			this.add(my_stop);
 		}
 	}

@@ -56,21 +56,24 @@ document.addEventListener("DOMContentLoaded",function() {
 		loadTexture(null, "images/train_basic.json")
 		.then(function(url) {
 
+      // A message on the platform.
+      var message = new PIXI.Text("R142.", {fontFamily: "Helevetica", fontSize: 64, fill: "gray"});
+        message.position.set(900, 92);
+        stage.addChild(message);
+
+      // Init east-bound trains.
 		  for (var i = 0; i < 1; i++) {
 		  	trains_east[i] = new r142.Train(url, 'R142-left.png', 'R142-right.png', 4);
 		  	trains_east[i].setSchedule(schedule.normal);
 		  }
 
+      // Init west-bound trains.
 		  for (var i = 0; i < 1; i++) {
 		  	trains_west[i] = new r142.Train(url, 'r42-left.png', 'r42-right.png', 6);
 		  	trains_west[i].setSchedule(schedule.normal);
 		  }
 
 		}).then(() => {
-
-		    var message = new PIXI.Text("R142.", {fontFamily: "Helevetica", fontSize: 64, fill: "gray"});
-		    message.position.set(256, 0);
-		    stage.addChild(message);
 
 		    gameLoop();
 		});
