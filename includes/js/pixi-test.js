@@ -4,18 +4,18 @@ var type = "WebGL",
   stage, renderer,
   state = play,
   screen = {
-  	width: 1392,
+  	width: 8092,
   	height: 384
   };
 
 var schedule = {
 	normal: [
-		    {	velocity: [20,0]	},
-		    {	decel: [0, .1]		},
-		    {	unload: [10, .05]	},
-		    {	load: [10, .05]		},
-		    {	acel: [20, .05]		}
-		  ],
+    {	velocity: [25,0]	},
+    {	decel: [0, .1]		},
+    {	unload: [10, .05]	},
+    {	load: [10, .05]		},
+    {	acel: [25, .05]		}
+  ],
 };
 
 // Init Pixi.
@@ -36,12 +36,20 @@ document.addEventListener("DOMContentLoaded",function() {
 
 	station = new rstation.Station('R142', 2);
 
-	station.setTrack(0,'w',0,64, 1560,156);
-	station.setTrack(1,'e',0,275, -1500, 275);
-
 	loadTexture(null, "images/station_basic.json")   //tile_floor.png")
 	.then((url) => {
 		station.initPlatform(url,0,screen.width, 156,256);
+
+    station.setTrack(0,'w',20, 156, 1560);
+    station.setTrackStopMarker(0, [10,8], 1560);
+    station.setTrackStopMarker(0, [6,4], 256);
+  //  station.setTrackArrivalZone(0, )
+  //  station.setTrackDepartureZone(0, )
+    station.setTrack(1,'e',25, 275, -1500);
+    station.setTrackStopMarker(1, [10,8], 4096);
+    station.setTrackStopMarker(1, [6], 3092);
+    station.setTrackStopMarker(1, [4], 2048);
+
 		station.open();
 	})
 	.then(() => {

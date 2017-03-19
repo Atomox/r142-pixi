@@ -29,16 +29,28 @@ var rstation = (function stationFactory() {
 				direction: 'e',
 				x: 0,
 				y: 0,
-				occupied: false
+				occupied: false,
+				stopmarker: {}
 			}
 		}
 
 		return results;
 	}
 
-  Station.prototype.add = function(item) {
-    this.container.addChild(item);
-  }
+	Station.prototype.getTrackSpeed = function(id, position) {
+
+		/**
+		   
+		   @TODO
+			Get speed by position. Tracks should be split to segments.
+		 */
+		
+		return this.tracks[id].speed;
+	}
+
+	Station.prototype.add = function(item) {
+		this.container.addChild(item);
+	}
 
 	Station.prototype.initPlatform = function(url, x1, x2, y1, y2) {
 
@@ -75,9 +87,7 @@ var rstation = (function stationFactory() {
 		 stage.addChild(this.container);
 	}
 
-	Station.prototype.setTrack = function setTrack(id, direction, x, y, spawn_x, spawn_y) {
-
-		console.log(this.tracks);
+	Station.prototype.setTrack = function setTrack(id, direction, speed, x, spawn_pos, signal) {
 
 		direction = direction.toLowerCase();
 		if (['n', 's', 'e', 'w'].indexOf(direction) === -1) {
@@ -91,10 +101,84 @@ var rstation = (function stationFactory() {
 		}
 
 		if (direction) { this.tracks[id].direction = direction; }
-		this.tracks[id].x = x;
-		this.tracks[id].y = y;
-		this.tracks[id].spawn_x = spawn_x;
-		this.tracks[id].spawn_y = spawn_y;
+		this.tracks[id].speed = (typeof speed === 'number') ? speed : 20;
+
+		if (direction == 'e' || direction == 'w') {
+			this.tracks[id].x = 0;
+			this.tracks[id].y = x;
+			this.tracks[id].spawn_x = spawn_pos;
+			this.tracks[id].spawn_y = 0;			
+		}
+		else {
+			this.tracks[id].x = x;
+			this.tracks[id].y = 0;
+			this.tracks[id].spawn_x = 0;
+			this.tracks[id].spawn_y = spawn_pos;			
+		}
+
+	}
+
+	/**
+	 * Set the forward stop marker for trains arriving on this platform/track.
+	 * 
+	 * @param {int} id
+	 *   Track number.
+	 * @param {int} train_num
+	 *   Number of cars, like 10, 8, 6, 4.
+	 * @param {int} x
+	 *   The track position where this marker lives.
+	 */
+	Station.prototype.setTrackStopMarker = function(id, train_num, x) {
+
+		if (typeof train_num !== 'object' && typeof train_num === 'number') {
+			train_num = [train_num];
+		}
+
+		for (var i = 0; i < train_num.length; i++) {
+			this.tracks[id].stopmarker[train_num[i]] = x;
+
+			// Platform floor
+		    var stop_tex = PIXI.utils.TextureCache["stopmarker" + train_num[i] + ".png"];
+    		var my_stop = new PIXI.Sprite(stop_tex);
+			my_stop.position.x = x;
+			my_stop.position.y = this.tracks[id].y-70 - my_stop.height;
+
+			this.add(my_stop);
+		}
+	}
+
+	/**
+	 * Set the buffer before the station where signal buffer triggers begin.
+	 * 
+	 * @param {int} id
+	 *   Track number.
+	 * @param {int} yellow 
+	 *   Distance before platform where signal turns from green to yellow.
+	 * @param {int} red    
+	 *   Distance before platform where signal turns from yellow to red.
+	 */
+	Station.prototype.setTrackArrivalZone = function setTrackArriveZone(id, yellow, red) {
+		this.tracks[id].arrive = {
+			yellow: yellow,
+			red: red
+		};
+	}
+
+	/**
+	 * Set the buffer after the station where signal buffer triggers begin.
+	 * 
+	 * @param {int} id
+	 *   Track number.
+	 * @param {int} yellow 
+	 *   Distance from platform where signal changes from red to yellow.
+	 * @param {int} red    
+	 *   Distance from platform where signal starts at red.
+	 */
+	Station.prototype.setTrackDepartureZone = function setTrackDepartZone(id, yellow, red) {
+		this.tracks[id].depart = {
+			yellow: yellow,
+			red: red
+		};	
 	}
 
 	Station.prototype.scheduleTrain = function(track, train) {
@@ -109,17 +193,26 @@ var rstation = (function stationFactory() {
 
 		train.setDirection(this.tracks[track].direction);
 
+
+		// station.setTrackStopMarker(0, [10,8,6,4], 256);
+		//train.setSchedule();
+
+		// 1. Determine spawn point & starting velocity.
+		// 2. Determine current speed limit.
+		// 3. Determine distance to decrease velocity from current to 0.
+		// 4. Determine distance from platform stop marker
+
 		// When east-bound, start the train west of the x spawn point.
 		if (this.tracks[track].direction == 'e') {
-			train.setPosition(this.tracks[track].spawn_x, this.tracks[track].spawn_y, true, true);
+			train.setPosition(this.tracks[track].spawn_x, this.tracks[track].y, true, true);
 		}
 		else {
-			train.setPosition(this.tracks[track].spawn_x, this.tracks[track].spawn_y, true);
+			train.setPosition(this.tracks[track].spawn_x, this.tracks[track].y, true);
 		}
 		
 	}
 
-		Station.prototype.trackStatus = function(track) {
+	Station.prototype.trackStatus = function(track) {
 		if (typeof this.tracks[track] === undefined) {
 			console.warn(track, 'does not exist at station', this.name);
 			return false;

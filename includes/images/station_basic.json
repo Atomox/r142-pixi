@@ -1,8 +1,35 @@
 {"frames": {
 
+"stopmarker4.png":
+{
+	"frame": {"x":0,"y":0,"w":37,"h":37},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":37,"h":37},
+	"sourceSize": {"w":37,"h":37},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"stopmarker6.png":
+{
+	"frame": {"x":37,"y":0,"w":37,"h":37},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":37,"h":37},
+	"sourceSize": {"w":37,"h":37},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"stopmarker8.png":
+{
+	"frame": {"x":74,"y":0,"w":37,"h":37},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":37,"h":37},
+	"sourceSize": {"w":37,"h":37},
+	"pivot": {"x":0.5,"y":0.5}
+},
 "tile_floor_gray.png":
 {
-	"frame": {"x":0,"y":0,"w":75,"h":75},
+	"frame": {"x":111,"y":0,"w":75,"h":75},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":75,"h":75},
@@ -11,7 +38,7 @@
 },
 "white_tile_wall.png":
 {
-	"frame": {"x":75,"y":0,"w":75,"h":75},
+	"frame": {"x":186,"y":0,"w":75,"h":75},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":75,"h":75},
@@ -20,7 +47,7 @@
 },
 "yellow_edge.png":
 {
-	"frame": {"x":150,"y":0,"w":75,"h":75},
+	"frame": {"x":261,"y":0,"w":75,"h":75},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":75,"h":75},
@@ -32,8 +59,8 @@
 	"version": "1.0",
 	"image": "station_basic.png",
 	"format": "RGBA8888",
-	"size": {"w":225,"h":75},
+	"size": {"w":336,"h":75},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:99d21af8152d1892770487b66c656de6:bf30e0d2982af18d8201ebc9ac7171c3:0b1b69aa95e1a92762d168234cf20667$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a3a04e1ea79f296c80adaaaab9ec6b1e:7e0ebe7d68f46b7c3778b76b3a8ba227:0b1b69aa95e1a92762d168234cf20667$"
 }
 }
