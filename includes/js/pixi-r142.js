@@ -143,6 +143,7 @@ var r142 = (function r142Factory() {
     };
   }
 
+
   Train.prototype.continue = function() {
     if (this.status == 'decel') {
       if (this.container.vx - this.action.step <= 0) {
@@ -186,6 +187,25 @@ var r142 = (function r142Factory() {
   }
 
   Train.prototype.update = function() {
+
+    /**
+     * Stopping:
+     * 1. Where is our next stop?
+     * 2. Check the current speed limit.
+     * 3. Given our speed, how long will it take to stop?
+     * 4. Proceed until we should begin stopping.
+     *
+     * Starting:
+     * 1. When is our next stop, if any?
+     * 2. Check the current speed limit.
+     * 3. Begin acceleration to speed limit.
+     *
+     * Continuing:
+     * 1. Check the current speed limit.
+     * 2. Adjust our current speed to accomodate for speed limit.
+     */
+
+
     // get status.
     if (this.status == 'waiting' || this.status == 'idle') {
       this.nextAction();
