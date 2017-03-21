@@ -47,6 +47,24 @@ var rstation = (function stationFactory() {
 		};
 	}
 
+	Station.prototype.render = function render(x1,x2,y1,y2) {
+		/**
+
+
+
+
+
+		   @TODO
+
+				Get offset, and render platforms.
+
+
+
+
+		 */
+
+	}
+
 	/**
 	 * Get the entire length of the station.
 	 *
