@@ -9,12 +9,10 @@ var rtrack = (function() {
 	 *   Track number. Must be unique.
 	 * @param {string} direction
 	 *   Direction of tracks.
-	 * @param {int} x
-	 *   Position of beginning of track at segment 0.
-	 * @param {int} y
-	 *   Position of beginning of track at segment 0.
+	 * @param {int} height
+	 *   Fixed height of this track.
 	 */
-	function Track(id, direction, x, y) {
+	function Track(id, direction, height) {
 		this.direction = direction.toLowerCase();
 		if (['n', 's', 'e', 'w'].indexOf(direction) === -1) {
 			console.warn('Invalid track direction:', direction);
@@ -22,15 +20,23 @@ var rtrack = (function() {
 		}
 
 		this.id = id;
+		this.height = height;
 		this.segments = [];
-		this.position.x = x;
-		this.position.y = y;
 	}
 
 
 	Track.prototype.initRenderer = function() {
 		this.container = new PIXI.Container();
 		this.renderer = rtrackpixi;
+	}
+
+
+	Track.prototype.setTrackSegments = function setSegments(settings) {
+		if (typeof settings === 'object' && settings !== null) {
+			for (var i = 0; i < settings.length; i++) {
+				this.setTrackSegment(settings[i]);
+			}
+		}
 	}
 
 
@@ -59,12 +65,15 @@ var rtrack = (function() {
 			}
 		}
 
+		this.segments[id].id = id;
 		this.segments[id].length = settings.length;
 		this.segments[id].direction = settings.direction;
 		this.segments[id].speed = (typeof settings.speed === 'number') ? settings.speed : 20;
+
+		console.log('Added segment', this.segments[id]);
 	}
 
-	Track.prototype.setTrackTrain = function setTrain(segment, position, ) {}
+	Track.prototype.setTrackTrain = function setTrain(segment, position) {}
 	Track.prototype.setTrackStation = function setStation() {}
 
 
@@ -85,7 +94,8 @@ var rtrack = (function() {
 		}
 
 		for (var i = 0; i < train_num.length; i++) {
-			this.tracks[id].stopmarker.push({
+			if (typeof this.segments[id].stopmarker === 'undefined') { this.segments[id].stopmarker = []; }
+			this.segments[id].stopmarker.push({
 				cars: train_num[i],
 				x: x
 			});
@@ -98,13 +108,17 @@ var rtrack = (function() {
 	 * @return {int}
 	 *   The length.
 	 */
-	Track.prototype.length = function length() {
+	Track.prototype.getLength = function length() {
 		var len = 0;
 		for (var i = 0; i < this.segments.length; i++) {
 			len += this.segments[i].length;
 		}
 
 		return len;
+	}
+
+	Track.prototype.getHeight = function height() {
+		return this.height;
 	}
 
 	Track.prototype.getTrackSpeedLimit = function speedLimit() {}
@@ -128,25 +142,40 @@ var rtrack = (function() {
 		// Detemrine which segments fall within our view port.
 		var my_segments = this.getSegmentsByBounds(x1,x2,y1,y2);
 
+		console.log('Segments within bounds of', x1,x2,y1,y2, ': ', my_segments);
+
 		// Render each segment, accounting for offsets.
 		for (var i = 0; i < my_segments.length; i++) {
-			this.renderSegment(my_segments[i].id,x1-my_segments[i].distance,y1);
+			console.log('adjusting coords to local: ', x1, my_segments[i].distance, 'y:', y1);
+			var offset_x = my_segments[i].distance - x1;
+			this.renderSegment(my_segments[i].id,offset_x,0);
 		}
+
+		/**
+		   @TODO
+
+		     Set this.container to x1,x2
+		 */
 
 		return this.container;
 	}
 
 	Track.prototype.renderSegment = function renderSegment(id, offset_x, offset_y) {
 
+		console.log('Renderinging track segment', id, ' with offsets:',offset_x,offset_y);
+
     // Marker for start of track segment.
     var message = new PIXI.Text(id, {fontFamily: "Helevetica", fontSize: 64, fill: "gray"});
+
     message.position.set(offset_x, offset_y);
     this.container.addChild(message);
 
 		// Fetch and render all stop markers.
 		var markers = this.getStopMarker(id);
 		for (var i = 0; i < markers.length; i++) {
-			this.container.addChild(this.renderer.stopMarker(markers[i].cars, markers[i].x + offset_x, offset_y));
+			var marker = this.renderer.stopMarker(markers[i].cars, markers[i].x + offset_x, offset_y);
+			this.container.addChild(marker);
+			console.log('Adding marker in segment', id, marker);
 		}
 
 		// Fetch and render all signals.
@@ -176,6 +205,7 @@ var rtrack = (function() {
 
 		for (var i = 0; i < this.segments.length; i++) {
 			if (length >= x1 && length <= x2) {
+				console.log('Bounding segment: ', this.segments[i]);
 				results.push({
 					id: this.segments[i].id,
 					distance: length

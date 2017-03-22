@@ -30,7 +30,6 @@ var rsystem = (function() {
 	  this.renderer.view.style.border = "1px dashed black";
 	  this.renderer.backgroundColor = 0xFFFFFF;
 	  this.renderer.autoResize = true;
-	//  this.renderer.resize(1392, 512);
 
 	  // Add the canvas to the HTML document
 	  document.body.appendChild(this.renderer.view);
@@ -43,8 +42,8 @@ var rsystem = (function() {
 			position: {
 				x1: x,
 				y1: y,
-				x2: Track.length,
-				y2: Track.height
+				x2: Track.getLength(),
+				y2: Track.getHeight()
 			}
 		};
 	}
@@ -56,24 +55,63 @@ var rsystem = (function() {
 			position: {
 				x1: x,
 				y1: y,
-				x2: Station.length,
-				y2: Station.height
+				x2: Station.getLength(),
+				y2: Station.getHeight()
 			}
 		};
 	}
 
-	System.prototype.render = function render(x1,y1, width, height) {
+	System.prototype.state = function state() {
+
+/**
+		// East-bound:
+		if (station.trackStatus(0) == true && typeof trains_east[east_bound] !== 'undefined') {
+			console.log('Scheduling train');
+
+		  // Schedule a train.
+		  station.scheduleTrain(0, trains_east[east_bound]);
+			east_bound++;
+		}
+		else if (station.trackStatus(0) == true) {
+			console.log('Track 0 is free');
+		}
+
+		// West-bound:
+		if (station.trackStatus(1) == true && typeof trains_west[west_bound] !== 'undefined') {
+			console.log('Scheduling train');
+
+		  // Schedule a train.
+		  station.scheduleTrain(1, trains_west[west_bound]);
+			west_bound++;
+		}
+		else if (station.trackStatus(1) == true) {
+			console.log('Track 1 is free');
+		}
+
+
+		if (typeof trains_east[east_bound-1] !== 'undefined') {
+			trains_east[east_bound-1].update();
+		}
+		if (typeof trains_west[west_bound-1] !== 'undefined') {
+			trains_west[west_bound-1].update();
+		}
+*/
+
+	  return true;
+	}
+
+	System.prototype.assembleFrame = function render(x1,y1, width, height) {
 
 		if (width <= 0 || height <= 0) {
 			throw new Error('viewport width/height must be positive integers.');
 		}
 
-		x2 = x1 + width;
-		y2 = y1 + height;
+		var x2 = x1 + width,
+				y2 = y1 + height;
 
 		// Check for tracks at this position.
 		// If tracks, get start location for this track, then offset to start of track in viewport.
-		this.renderTracks();
+		this.renderTracks(x1, x2, y1, y2);
 
 		// Check for stations at this position.
 		// If station, get start location for station, then offset to start of station in viewport.
@@ -83,6 +121,11 @@ var rsystem = (function() {
 
 		 */
 	};
+
+	System.prototype.renderFrame = function renderFrame() {
+		// Render frame in Pixi.
+		this.renderer.render(this.stage);
+	}
 
 
 	/**
@@ -96,19 +139,30 @@ var rsystem = (function() {
 		// Find all tracks that overlap our viewport.
 		var my_tracks = this.findTracks(x1, x2, y1, y2);
 
+		console.log('Found', my_tracks.length, 'tracks to render.');
+
 		// Assemble all tracks, and gather the containers for each track.
 		// Each container will include all track segments
 		// that fall within our viewport.
 		for (var i = 0; i < my_tracks.length; i++) {
 			var my_track = this.tracks[my_tracks[i]];
 
+			// Render the container with normal coordinates, offset by the difference
+			// between track starting x,y and 
+			// 
+
 			// Offset coordinates for the track's starting position.
 			var my_track_container = my_track.track.render(
 				x1-my_track.position.x1,
-				x2-my_track.position.x2,
+				x2-my_track.position.x1,
 				y1-my_track.position.y1,
-				y2-my_track.position.y2
+				y2-my_track.position.y1
 			);
+
+			console.log('Moving Track container to coords:',x1 + my_track.position.x1,x1 + my_track.position.x1);
+
+			my_track_container.x = x1 + my_track.position.x1;
+			my_track_container.y = y1 + my_track.position.y1;
 
 			// Add the track container to the stage.
 			this.stage.addChild(my_track_container);
@@ -125,12 +179,13 @@ var rsystem = (function() {
 	System.prototype.findTracks = function(x1,x2,y1,y2) {
 		var results = [];
 
-		for (var i =0; i < this.tracks.length; i++) {
-			if (checkForIntersection(x1,x2,y1,y2, 
+		for (var i = 0; i < this.tracks.length; i++) {
+			if (checkForIntersection(
 				this.tracks[i].position.x1,
 				this.tracks[i].position.x2,
 				this.tracks[i].position.y1,
-				this.tracks[i].position.y2) === true) {
+				this.tracks[i].position.y2,
+				x1,x2,y1,y2) === true) {
 
 				// Include this track.
 				results.push(this.tracks[i].id);
@@ -145,7 +200,9 @@ var rsystem = (function() {
 	 * falls within the box, return true;
 	 *
 	 * @param  {int} x1,x2,y1,y2
+	 *  Object we're checking for.
 	 * @param  {int} a1,a2,b1,b2
+	 *  Bounding box that may overlap.
 	 *
 	 * @return {boolean}
 	 *   TRUE if at least one pair falls on or within the borders
@@ -153,16 +210,30 @@ var rsystem = (function() {
 	 */
 	function checkForIntersection(x1, x2, y1, y2, a1, a2, b1, b2) {
 
+		console.log('Checking for intersection: ', x1, x2, y1, y2, a1, a2, b1, b2);
+
 		// x1 or x2 Greater than lowerbound, but not greater than upper bound.
 		if (x1 >= a1 && x1 <= a2 || x2 >= a1 && x2 <= a2) {
+			console.log(x1, ',', x2, ' is bound in', a1, ',', a2);
 			// y1 or y2 greater than lower bound, but not greater than upperbound.
 			if (y1 >= b1 && y1 <= b2 || y2 >= b1 && y2 <= b2) {
+				console.log(y1, ',', y2, ' is bound in', b1, ',', b2);
 				// We have at least overlap into our bounding box.
 				return true;
 			}
+			else {
+				console.log(y1, ',', y2, ' is not bound in', b1, ',', b2);
+			}
+		}
+		else {
+			console.log(x1, ',', x2, ' is not bound in', a1, ',', a2);
 		}
 
 		return false;
 	}
+
+	return {
+		System: System
+	};
 
 })();
