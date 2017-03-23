@@ -64,7 +64,7 @@ var rsystem = (function() {
 
 
 	System.prototype.addTrain = function addTrain(track, position, Train) {
-		console.log('Adding train to track:', track, 'at position: ', position, this.tracks[track].track, Train);
+		console.log('Adding train to track:', track, 'at position: ', position);
 		if (typeof this.tracks[track].track === 'undefined') {
 			throw new Error('Track ' + track + ' must be initialized before adding a train.');
 		}

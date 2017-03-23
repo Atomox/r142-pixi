@@ -224,7 +224,7 @@ var rtrain = (function rTrainFactory() {
 
     var x = 0;
 
-    x = ((car_num * my_car.width) + x);
+    x = (((car_num-1) * my_car.width) + x);
 
     // Positioning.
     my_car.position.set(x,0);
@@ -246,6 +246,8 @@ var rtrain = (function rTrainFactory() {
         car.push(setupCar.call(this, car_img, i+1));
         this.add(car[i]);
     }
+
+    this.container.x = position;
 
     return this.container;
   }
