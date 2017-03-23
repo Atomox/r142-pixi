@@ -28,17 +28,15 @@ document.addEventListener("DOMContentLoaded",function() {
 		// Assemble the system.
 		system.assembleFrame(25,25, screen.width, screen.height);
 
-		/**
 		// Init train 0.
-		trains_east[0] = new rtrain.Train(4);
-		trains_east[1] = new rtrain.Train(4);
+		trains_east[0] = new rtrain.Train('R142-left.png', 'R142-right.png', 4);
+		trains_east[1] = new rtrain.Train('R142-left.png', 'R142-right.png', 4);
 
-		// Add train to segment 4 of track 0.
-		track[0].setTrackTrain(4,0,trains_east[0]);
+		// Add train to 0, at position 0.
+		system.addTrain(0, 0, trains_east[0]);
 
-		// Add train to segment 6 of track 0.
-		track[0].setTrackTrain(8,0,trains_east[1]);
-		*/
+		// Add train to track 0, at position 5000.
+		system.addTrain(0, 7500,trains_east[1]);
 
 		gameLoop();
 	});

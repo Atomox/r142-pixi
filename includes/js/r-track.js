@@ -22,6 +22,7 @@ var rtrack = (function() {
 		this.id = id;
 		this.height = height;
 		this.segments = [];
+		this.trains = [];
 	}
 
 
@@ -69,9 +70,106 @@ var rtrack = (function() {
 		this.segments[id].length = settings.length;
 		this.segments[id].direction = settings.direction;
 		this.segments[id].speed = (typeof settings.speed === 'number') ? settings.speed : 20;
+		this.segments[id].occupied = false;
 	}
 
-	Track.prototype.setTrackTrain = function setTrain(segment, position) {}
+
+	/**
+	 * Assign a train to a position.
+	 *
+	 * @param {[type]} segment_id [description]
+	 * @param {[type]} position   [description]
+	 */
+	Track.prototype.setTrackTrain = function setTrain(position, train) {
+
+		// Render the train container, and add it.
+		var my_train_container = train.render(position);
+		this.container.addChild(my_train_container);
+
+		// Add the train to this track.
+		this.trains.push(train);
+
+		// Get all segments this train would occupy.
+		var my_segments = this.getSegmentsByBounds(position, train.length);
+
+		// Check each segment, and make sure the entire space is unoccupied.
+		if (this.segmentOccupied(my_segments) === true) {
+			return false;
+		}
+
+		// Assign the train to these track segments.
+		this.setSegmentOccupied(my_segments, this.trains.length-1);
+
+		// Set the train direction.
+		train.setDirection(this.direction);
+
+		// Set the train position.
+		if (this.direction == 'e') {
+			train.setPosition(position, this.height, true, false);
+		}
+		else {
+			train.setPosition(position, this.height, true, true);
+		}
+	}
+
+
+	Track.prototype.setSegmentOccupied = function setSegmentOccupied(id, train_id) {
+		if (typeof id === 'number') {
+			id = [id];
+		}
+
+		/**
+		  
+
+
+		  @TODO
+
+
+
+		 */
+		for (var i =0; i < id.length; i++) {
+			// Set segment .occupied = id[i];
+		}
+	}
+
+	Track.prototype.resetSegmentOccupied = function resetSegmentOccupiedt(id) {
+		if (typeof id === 'number') {
+			id = [id];
+		}
+
+		/**
+		  
+
+
+		  @TODO
+
+
+
+		 */
+		for (var i =0; i < id.length; i++) {
+			// Set segment .occupied = false;
+		}
+	}
+
+
+	/**
+	 * Is a particular segment occupied?
+	 *
+	 * @param  {[type]} segments [description]
+	 * @return {[type]}          [description]
+	 */
+	Track.prototype.segmentOccupied = function segmentOccupied(segments) {
+		for (var i = 0; i < segments.length; i++) {
+			console.log('Segments to check:', segments);
+			if (segments[i].occupied !== false) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
 	Track.prototype.setTrackStation = function setStation() {}
 
 
@@ -153,7 +251,7 @@ var rtrack = (function() {
 		}
 
 		// Detemrine which segments fall within our view port.
-		var my_segments = this.getSegmentsByBounds(x1,x2,y1,y2);
+		var my_segments = this.getSegmentsByBounds(x1,x2);
 
 		console.log('Segments within bounds of', x1,x2,y1,y2, ': ', my_segments);
 
@@ -212,7 +310,7 @@ var rtrack = (function() {
 
 	}
 
-	Track.prototype.getSegmentsByBounds = function segmentByBounds(x1,x2,y1,y2) {
+	Track.prototype.getSegmentsByBounds = function segmentByBounds(x1,x2) {
 		var length = 0,
 				results = [];
 

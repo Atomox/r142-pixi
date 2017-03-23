@@ -48,6 +48,7 @@ var rsystem = (function() {
 		};
 	}
 
+
 	System.prototype.addStation = function addStation(id, x,y, Station){
 		this.station[id] = {
 			id: id,
@@ -60,6 +61,16 @@ var rsystem = (function() {
 			}
 		};
 	}
+
+
+	System.prototype.addTrain = function addTrain(track, position, Train) {
+		console.log('Adding train to track:', track, 'at position: ', position, this.tracks[track].track, Train);
+		if (typeof this.tracks[track].track === 'undefined') {
+			throw new Error('Track ' + track + ' must be initialized before adding a train.');
+		}
+		this.tracks[track].track.setTrackTrain(position, Train);
+	}
+
 
 	System.prototype.state = function state() {
 

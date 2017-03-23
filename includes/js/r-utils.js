@@ -35,7 +35,6 @@ var rutils = (function() {
 	 */
 	function checkForIntersection(x1, x2, a1, a2) {
 
-		console.log('Checking for intersection: ', x1, x2, a1, a2);
 		if (x1 >= x2) {
 			throw new Error('0 or negative distance between coordinates when checking for intersection.' + x1 + ', ' + x2);
 		}
