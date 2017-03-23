@@ -180,7 +180,7 @@ var rsystem = (function() {
 		var results = [];
 
 		for (var i = 0; i < this.tracks.length; i++) {
-			if (checkForIntersection(
+			if (rutils.boxIntersection(
 				this.tracks[i].position.x1,
 				this.tracks[i].position.x2,
 				this.tracks[i].position.y1,
@@ -195,42 +195,6 @@ var rsystem = (function() {
 		return results;
 	}
 
-	/**
-	 * Check two pairs of coordinates for any intersection. if at least 1 x/y pair
-	 * falls within the box, return true;
-	 *
-	 * @param  {int} x1,x2,y1,y2
-	 *  Object we're checking for.
-	 * @param  {int} a1,a2,b1,b2
-	 *  Bounding box that may overlap.
-	 *
-	 * @return {boolean}
-	 *   TRUE if at least one pair falls on or within the borders
-	 *   of the bounding box.
-	 */
-	function checkForIntersection(x1, x2, y1, y2, a1, a2, b1, b2) {
-
-		console.log('Checking for intersection: ', x1, x2, y1, y2, a1, a2, b1, b2);
-
-		// x1 or x2 Greater than lowerbound, but not greater than upper bound.
-		if (x1 >= a1 && x1 <= a2 || x2 >= a1 && x2 <= a2) {
-			console.log(x1, ',', x2, ' is bound in', a1, ',', a2);
-			// y1 or y2 greater than lower bound, but not greater than upperbound.
-			if (y1 >= b1 && y1 <= b2 || y2 >= b1 && y2 <= b2) {
-				console.log(y1, ',', y2, ' is bound in', b1, ',', b2);
-				// We have at least overlap into our bounding box.
-				return true;
-			}
-			else {
-				console.log(y1, ',', y2, ' is not bound in', b1, ',', b2);
-			}
-		}
-		else {
-			console.log(x1, ',', x2, ' is not bound in', a1, ',', a2);
-		}
-
-		return false;
-	}
 
 	return {
 		System: System

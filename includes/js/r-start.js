@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.addTrack(0, 5, 64, tracks[0]);
 
 		// Assemble the system.
-		system.assembleFrame(0,0, screen.width, screen.height);
+		system.assembleFrame(25,25, screen.width, screen.height);
 
 		/**
 		// Init train 0.

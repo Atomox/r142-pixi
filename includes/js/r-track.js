@@ -69,8 +69,6 @@ var rtrack = (function() {
 		this.segments[id].length = settings.length;
 		this.segments[id].direction = settings.direction;
 		this.segments[id].speed = (typeof settings.speed === 'number') ? settings.speed : 20;
-
-		console.log('Added segment', this.segments[id]);
 	}
 
 	Track.prototype.setTrackTrain = function setTrain(segment, position) {}
@@ -139,6 +137,21 @@ var rtrack = (function() {
 		// Make sure we've initialized our renderer.
 		if (typeof this.container === 'undefined') { this.initRenderer(); }
 
+		console.log('Rendering tracks from: ', x1, x2);
+
+		for (var a = x1; a < x2; a += 100) {
+			// Ruler.
+	    var message = new PIXI.Text(a, {fontFamily: "Helvetica", fontSize: 12, fill: "gray"});
+	    message.position.set(a, this.height - message.height);
+			this.container.addChild(message);
+		}
+		for (var b = 0; b < this.height; b += 20) {
+			// Ruler.
+	    var message = new PIXI.Text((y1+b) + ', ' + b, {fontFamily: "Helvetica", fontSize: 12, fill: "gray"});
+	    message.position.set(0, b-message.height);
+			this.container.addChild(message);
+		}
+
 		// Detemrine which segments fall within our view port.
 		var my_segments = this.getSegmentsByBounds(x1,x2,y1,y2);
 
@@ -147,7 +160,7 @@ var rtrack = (function() {
 		// Render each segment, accounting for offsets.
 		for (var i = 0; i < my_segments.length; i++) {
 			console.log('adjusting coords to local: ', x1, my_segments[i].distance, 'y:', y1);
-			var offset_x = my_segments[i].distance - x1;
+			var offset_x = my_segments[i].distance;
 			this.renderSegment(my_segments[i].id,offset_x,0);
 		}
 
@@ -204,15 +217,16 @@ var rtrack = (function() {
 				results = [];
 
 		for (var i = 0; i < this.segments.length; i++) {
-			if (length >= x1 && length <= x2) {
+			if (rutils.intersection(length, (length+this.segments[i].length), x1, x2)) {
 				console.log('Bounding segment: ', this.segments[i]);
 				results.push({
 					id: this.segments[i].id,
 					distance: length
 				});
-				length += this.segments[i].length;
 			}
 			else if (length > x2) { break; }
+
+			length += this.segments[i].length;
 		}
 
 		return results;
