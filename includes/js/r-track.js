@@ -77,28 +77,41 @@ var rtrack = (function() {
 	/**
 	 * Assign a train to a position.
 	 *
-	 * @param {[type]} segment_id [description]
-	 * @param {[type]} position   [description]
+	 * @param {int} position
+	 *   A coordinate position on the track. Relative to the track.
+	 * @param {Train} train
+	 *   The train object being added.
 	 */
 	Track.prototype.setTrackTrain = function setTrain(position, train) {
 
 		// Render the train container, and add it.
 		var my_train_container = train.render(position);
+
+		console.log(' > Request to add train to track', this.id, 'at range: ', position, position + train.getLength());
+
+		// Get all segments this train would occupy.
+		var my_segments = this.getSegmentsByBounds(position, position + train.getLength());
+
+		console.log('   -> Segments train would occupy:', my_segments);
+
+		// Check each segment, and make sure the entire space is unoccupied.
+		if (this.segmentsOccupied(my_segments,null) === true) {
+			console.warn('Train cannot be added, as location is already occupied.');
+			return false;
+		}
+
+		console.log('   -> Location available. Adding train.');
 		this.container.addChild(my_train_container);
 
 		// Add the train to this track.
 		this.trains.push(train);
 
-		// Get all segments this train would occupy.
-		var my_segments = this.getSegmentsByBounds(position, train.length);
-
-		// Check each segment, and make sure the entire space is unoccupied.
-		if (this.segmentOccupied(my_segments) === true) {
-			return false;
-		}
+		console.log('   -> Train added. Setting segments as occupied.');
 
 		// Assign the train to these track segments.
 		this.setSegmentOccupied(my_segments, this.trains.length-1);
+
+		console.log('   -> Segments marked occupied:', my_segments);
 
 		// Set the train direction.
 		train.setDirection(this.direction);
@@ -113,60 +126,35 @@ var rtrack = (function() {
 	}
 
 
+	/**
+	 * Set 1 or more segments as occupied by a train.
+	 *
+	 * @param {array[objects]} id
+	 *   One or more objects, with segment ID in id[n].id.
+	 * @param {int} train_id
+	 *   The ID of the train which is occupying the space.
+	 */
 	Track.prototype.setSegmentOccupied = function setSegmentOccupied(id, train_id) {
-		if (typeof id === 'number') {
-			id = [id];
-		}
+		if (typeof id === 'number') { id = [id]; }
 
-		/**
-		  
-
-
-		  @TODO
-
-
-
-		 */
-		for (var i =0; i < id.length; i++) {
-			// Set segment .occupied = id[i];
-		}
-	}
-
-	Track.prototype.resetSegmentOccupied = function resetSegmentOccupiedt(id) {
-		if (typeof id === 'number') {
-			id = [id];
-		}
-
-		/**
-		  
-
-
-		  @TODO
-
-
-
-		 */
-		for (var i =0; i < id.length; i++) {
-			// Set segment .occupied = false;
+		for (var i = 0; i < id.length; i++) {
+			this.segments[id[i].id].occupied = train_id;
 		}
 	}
 
 
 	/**
-	 * Is a particular segment occupied?
+	 * Reset a given segment to unoccupied.
 	 *
-	 * @param  {[type]} segments [description]
-	 * @return {[type]}          [description]
+	 * @param  {array[obj]} id
+	 *   One or more segment IDs.
 	 */
-	Track.prototype.segmentOccupied = function segmentOccupied(segments) {
-		for (var i = 0; i < segments.length; i++) {
-			console.log('Segments to check:', segments);
-			if (segments[i].occupied !== false) {
-				return true;
-			}
-		}
+	Track.prototype.resetSegmentOccupied = function resetSegmentOccupiedt(id) {
+		if (typeof id === 'number') {	id = [id]; }
 
-		return false;
+		for (var i = 0; i < id.length; i++) {
+			this.segments[id[i].id].occupied = false;
+		}
 	}
 
 
@@ -197,6 +185,134 @@ var rtrack = (function() {
 			});
 		}
 	}
+
+
+	/**
+	 * Given a position, find the next stopping point for a train.
+	 *
+	 * Check for red signals, stop markers, or end of line.
+	 *
+	 * @param {int} train_id
+	 *   The ID of the train requesting this, so we know if an occupied track is
+	 *   us or someone else.
+	 * @param  {int} num_cars
+	 *   Number of cars in a train. Used to determine relevant stop markers.
+	 * @param  {int} x
+	 *   Current position on the track.
+	 *
+	 * @return {int}
+	 *   The location of the next stopping point.
+	 */
+	Track.prototype.getTrainDestination = function getTrainDestination(train_id, num_cars, x) {
+		// Get train front location.
+		var my_segments = this.getSegmentsByBounds(x, x+1);
+		if (typeof my_segments !== 'object' || my_segments === null || my_segments.length <= 0) {
+			return false;
+		}
+
+		// Check signal. If red, stop in this segment,
+		// as next segment will be occupied.
+		if (this.getSignalStatus(train_id, my_segments[0].id) === -1) {
+			// Distance to start for n/e, otherwise distance to end of segment.
+			return this.getDistanceToSegment(my_segments[0].id) + (['n','e'].indexOf(this.direction) >= 0) ? my_segments[0].distance : 0;
+		}
+
+		// Otherwise, check for track stop marker.
+		for (var i = my_segments[0].id; i >= 0; i--) {
+			if (typeof this.segments[i] === 'undefined'
+				|| typeof this.segments[i].stopmarker === 'undefined') {
+				continue;
+			}
+
+			// Check for a stop marker matching our car number.
+			for (var n = 0; n < this.segments[i].stopmarker.length; n++) {
+				if (this.segments[i].stopmarker[n].cars == num_cars) {
+					return this.getDistanceToSegment(i) + x;
+				}
+			}
+		}
+
+		// Otherwise check for end of track.
+		return (['n','e'].indexOf(this.direction) >= 0) ? 0 : this.getLength();
+	}
+
+
+	/**
+	 * Get the signal of our current segment.
+	 *
+	 * @param  {int} train_id
+	 *   The ID of the train requesting the signal. This will help ignore
+	 *   reporting red when we're the occupying train.
+	 * @param  {int} sid
+	 *   The ID of the segment being checked.
+	 *
+	 * @return {int}
+	 *   -1 for red, 0 for caution, 1 for clear.
+	 */
+	Track.prototype.getSignalStatus = function getSignalStatus(train_id, sid) {
+		var next_sid = sid+1,
+				two_sid = sid+2;
+
+		if (['n','e'].indexOf(this.direction) >= 0) {
+			next_sid = sid - 1;
+			two_sid = sid - 2;
+		}
+
+		// If we're in an occupied segment, or the next segment is occupied,
+		// then red signal.
+		if (this.segmentOccupied(sid, train_id) === true
+			|| this.segmentOccupied(next_sid, train_id) === true) {
+			return -1;
+		}
+		// If the two segments away is occupied, then yellow signal.
+		else if (this.segmentOccupied(two_sid, train_id) === true) {
+			return 0;
+		}
+
+		// If the two segments in front are clear,
+		// then full steam ahead. (green signal)
+		return 1;
+	}
+
+
+	/**
+	 * Is a particular segment occupied?
+	 *
+	 * @param  {int} sid
+	 *   The ID of the segment we should check.
+	 * @param {int} train_id
+	 *   The ID of the train requesting this check. If occupied,
+	 *   but with this train_id, we'll count it as unoccupied.
+	 *
+	 * @return {boolean}
+	 *   True if occupied by *another* train. Otherwise, false.
+	 */
+	Track.prototype.segmentOccupied = function segmentOccupied(sid, train_id) {
+		if (typeof this.segments[sid] === 'undefined') {
+			console.warn('Attempting to check if an undefined segment is occupied.');
+		}
+		else if (this.segments[sid].occupied !== false) {
+			if (this.segments[sid].occupied !== train_id) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * Plural of segmentOccupied.
+	 */
+	Track.prototype.segmentsOccupied = function segmentsOccupied(sids, train_id) {
+		for (var i = 0; i < sids.length; i++) {
+			if (this.segmentOccupied(sids[i].id, train_id) === true) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	/**
 	 * Get the entire length of the track segments.
@@ -309,6 +425,29 @@ var rtrack = (function() {
 		 */
 
 	}
+
+
+	/**
+	 * Get the distance from the start of the track to
+	 * the start of a requested segment.
+	 *
+	 * @param  {int} id
+	 *   The ID of a segment who's distance we are looking for.
+	 *
+	 * @return {int | boolean}
+	 *   The distance, if found. Otherwise, FALSE.
+	 */
+	Track.prototype.getDistanceToSegment = function distanceToSegment(id) {
+		var length = 0,
+				results = [];
+		for (var i = 0; i < this.segments.length; i++) {
+			if (i === id ) {	return distance; }
+			distance += this.segments[i].length;
+		}
+
+		return false;
+	}
+
 
 	Track.prototype.getSegmentsByBounds = function segmentByBounds(x1,x2) {
 		var length = 0,

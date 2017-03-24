@@ -23,10 +23,10 @@ document.addEventListener("DOMContentLoaded",function() {
 		initTracks();
 
 		// Add track 0 to the system.
-		system.addTrack(0, 5, 64, tracks[0]);
+		system.addTrack(0, 50, 64, tracks[0]);
 
 		// Assemble the system.
-		system.assembleFrame(25,25, screen.width, screen.height);
+		system.assembleFrame(0,0, screen.width, screen.height);
 
 		// Init train 0.
 		trains_east[0] = new rtrain.Train('R142-left.png', 'R142-right.png', 4);

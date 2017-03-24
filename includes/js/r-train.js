@@ -13,6 +13,21 @@ var rtrain = (function rTrainFactory() {
     this.car_count = car_count;
   }
 
+  Train.prototype.getLength = function() {
+    if (typeof this.container !== 'undefined') {
+      console.log('train.getLength:', this.container.width);
+      return this.container.width;
+    }
+    return 0;
+  }
+
+  Train.prototype.getHeight = function() {
+    if (typeof this.container !== 'undefined') {
+      return this.container.height;
+    }
+    return 0;
+  }
+
   Train.prototype.add = function(item) {
     this.container.addChild(item);
   }
@@ -184,7 +199,104 @@ var rtrain = (function rTrainFactory() {
     return (this.status === 'idle') ? false : true;
   }
 
-  Train.prototype.update = function() {
+  Train.prototype.update = function(track) {
+
+    // Accel / Decel
+    if (['load', 'unload', 'doors_open', 'doors_close'].indexOf(this.status) >= 0) {
+
+    }
+
+    // Get next destination.
+    // Get signal of current segment.
+    // Get signal of enxt segment.
+
+    // Scenarios:
+    // 1. Stopped for load/unload
+    // 2. Stopped for signal.
+    // 3. Stopping for signal.
+    // 4. Speeding up for speed limit.
+    // 5. 
+
+
+    // What is out current status?
+    // If we are stopped, or stopping, continue.
+
+    // Check for next destination.
+    
+    // Should we slow down? Speed up?
+    
+    //
+
+
+
+
+
+
+
+      /**
+       
+
+
+
+
+
+        @TODO
+
+          Start logic to get train moving,and responding to signals.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Stopping:
