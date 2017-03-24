@@ -56,9 +56,22 @@ var rutils = (function() {
 
 		return false;
 	}
+	function calculateStoppingDistance(velocity, decel_rate, direction) {
+		var distance = 0;
 
+		if (velocity > 0) {
+			while (velocity > 0) {
+				distance += speed;
+				velocity -= decel_rate;
+			}
+		}
+
+		return distance;
+	}
 	return {
 		intersection: checkForIntersection,
-		boxIntersection: checkForBoxIntersection
+		boxIntersection: checkForBoxIntersection,
+		calculateStoppingDistance: calculateStoppingDistance
 	};
+
 })();

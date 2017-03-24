@@ -74,6 +74,12 @@ var rsystem = (function() {
 
 	System.prototype.state = function state() {
 
+		for (var i = 0; i < this.tracks.length; i++) {
+			if (typeof this.tracks[i].track !== 'undefined') {
+				this.tracks[i].track.state();
+			}
+		}
+
 /**
 		// East-bound:
 		if (station.trackStatus(0) == true && typeof trains_east[east_bound] !== 'undefined') {

@@ -33,10 +33,10 @@ document.addEventListener("DOMContentLoaded",function() {
 		trains_east[1] = new rtrain.Train('R142-left.png', 'R142-right.png', 4);
 
 		// Add train to 0, at position 0.
-		system.addTrain(0, 0, trains_east[0]);
+		system.addTrain(0, 500, trains_east[0]);
 
 		// Add train to track 0, at position 5000.
-		system.addTrain(0, 7500,trains_east[1]);
+		system.addTrain(0, 8000,trains_east[1]);
 
 		gameLoop();
 	});
@@ -67,7 +67,7 @@ function initTracks() {
 				[[6,4], 256]
 			]},
 		{id: 3, speed: 25, length: 1000},
-		{id: 4, speed: 25, length: 3000},
+		{id: 4, speed: 25, length: 5000},
 		{id: 5, speed: 25, length: 1000},
 		{id: 6, speed: 10, length: 4000,
 			station: {id: 1, track: 0},
@@ -77,6 +77,8 @@ function initTracks() {
 			]},
 		{id: 7, speed: 25, length: 1000},
 		{id: 8, speed: 25, length: 3000},
+		{id: 9, speed: 25, length: 5000},
+		{id: 10, speed: 25, length: 5000},
 	]);
 }
 

@@ -238,6 +238,46 @@ var rtrack = (function() {
 
 
 	/**
+	 * Get the speed limit for the current position, based upon signal.
+	 *
+	 * @param  {int} sid
+	 *   (optional) The segment ID.
+	 * @param  {int} x
+	 *   (required unless sid is not passed) Current forward position,
+	 *   which we use to determine where the train is.
+	 * @param  {int} train_id
+	 *   The ID of this train, which we use to determine if a red signal
+	 *   is a result of our train or someone else.
+	 *
+	 * @return {int}
+	 *   A number representing the max speed allowed in our current segment.
+	 */
+	Track.prototype.getSpeedLimit = function speedLimit(sid, x, train_id) {
+		if (typeof sid !== 'number' || sid < 0) {
+			var my_seg = this.getSegmentsByBounds(x, x+1);
+			if (typeof my_seg[0] !== 'undefined') { sid = my_seg[0].id; }
+		}
+
+		if (typeof this.segments[sid] !== 'undefined') {
+			// Get the signal here.
+			var my_status = this.getSignalStatus(train_id, sid);
+
+			if (my_status < 0) {
+				return 0;
+			}
+			else if (my_status === 0) {
+				return 10;
+			}
+			else {
+				this.segments[sid].speed;
+			}
+		}
+
+		return 0;
+	}
+
+
+	/**
 	 * Get the signal of our current segment.
 	 *
 	 * @param  {int} train_id
@@ -343,10 +383,67 @@ var rtrack = (function() {
 		}
 		return false;
 	}
-	Track.prototype.getTrackDirection = function direction() {}
-	Track.prototype.getTrackStation = function station() {}
+	Track.prototype.getTrackDirection = function direction() {	return this.direction; }
+
+	Track.prototype.state = function state() {
+
+		if (typeof this.state_counter === 'undefined') { this.state_counter = 0; }
+
+		// Update trains.
+		for (var i = 0; i < this.trains.length; i++) {
+			if (typeof this.trains[i] !== 'undefined') {
+				this.trains[i].state(this);
+			}
+		}
+
+		if (this.state_counter == 10) {
+			console.log('Updating platforms and signal Visuals.');
+
+			// Update signals.
+
+			// Update platforms.
 
 
+			// Reset count to zero.
+			this.state_counter = 0;
+		}
+		else {
+			this.state_counter++;
+		}
+
+		/**
+
+
+
+		   @TODO
+
+		    SLOW DOWN TIME SO WE CAN SEE WHAT'S HAPPENING.
+
+
+
+		 */
+
+
+		// Wait 1000 miliseconds before continueing.
+//		var dt = new Date();
+//		while ((new Date()) - dt <= 5000) { /* Do nothing */ }
+
+		return true;
+	}
+
+	/**
+	 * Render the track.
+	 *
+	 * Only need to call once, unless the viewport is moving.
+	 *
+	 * @param  {int} x1, x2, y1, y2
+	 *   Coordinates where the viewport is placed, relative to this
+	 *   track's placement in the system. Use this to determine which segments
+	 *   should be rendered, but not for coordinates within those segments.
+	 *
+	 * @return {PIXI Container}
+	 *   The track container, to be added to the system's container.
+	 */
 	Track.prototype.render = function(x1,x2,y1,y2) {
 		// Make sure we've initialized our renderer.
 		if (typeof this.container === 'undefined') { this.initRenderer(); }
@@ -439,7 +536,8 @@ var rtrack = (function() {
 	 */
 	Track.prototype.getDistanceToSegment = function distanceToSegment(id) {
 		var length = 0,
-				results = [];
+				results = [],
+				distance = 0;
 		for (var i = 0; i < this.segments.length; i++) {
 			if (i === id ) {	return distance; }
 			distance += this.segments[i].length;

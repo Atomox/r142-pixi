@@ -6,11 +6,20 @@ var rtrain = (function rTrainFactory() {
     this.container = new PIXI.Container();
     this.status = 'waiting';
     this.direction = 'e';
-  
+
     this.images = {};
     this.images.left = left;
     this.images.right = right;
     this.car_count = car_count;
+
+    this.container.vx = 0;
+    this.container.vy = 0;
+
+    this.decel_step = {
+      normal: .1,
+      medium: .2,
+      high: .3
+    };
   }
 
   Train.prototype.getLength = function() {
@@ -110,17 +119,39 @@ var rtrain = (function rTrainFactory() {
     return this.status;
   }
 
+/**
   Train.prototype.velocity = function(x,y) {
     this.container.vx = x;
     this.container.vy = y;
     this.status = 'velocity';
   }
+*/
 
   Train.prototype.unload = function(final, step) {
     this.velocity(0,0);
     this.status = 'unload';
     this.action = {
       type: 'unload',
+      final: final,
+      step: step
+    };
+  }
+
+  Train.prototype.doors_open = function(final, step) {
+    this.velocity(0,0);
+    this.status = 'doors_open';
+    this.action = {
+      type: 'unload',
+      final: final,
+      step: step
+    };
+  }
+
+  Train.prototype.doors_close = function(final, step) {
+    this.velocity(0,0);
+    this.status = 'doors_close';
+    this.action = {
+      type: 'load',
       final: final,
       step: step
     };
@@ -141,7 +172,7 @@ var rtrain = (function rTrainFactory() {
     this.action = {
       init: this.container.vx,
       type: 'decel',
-      final: final,
+      final: (['n','e'].indexOf(this.direction) >= 0) ? -final : final,
       step: step
     };
   }
@@ -151,32 +182,62 @@ var rtrain = (function rTrainFactory() {
     this.action = {
       type: 'acel',
       init: this.container.vx,
-      final: final,
+      final: (['n','e'].indexOf(this.direction) >= 0) ? -final : final,
       step: step
     };
   }
 
+  Train.prototype.maintain = function(speed) {
+    this.status = 'maintain';
+    this.action = {
+      type: 'maintain',
+      init: this.container.vx,
+      step: speed
+    };
+  }
+
+
+  /**
+   * Determine if velocity should be negative or positive, depending upon direction.
+   * @param  {[type]} direction [description]
+   * @param  {[type]} acel      [description]
+   * @param  {[type]} step      [description]
+   * @return {[type]}           [description]
+   */
+  Train.prototype.step = function step(acel, counter, step, limit) {
+    if (acel == true) {
+      counter += step;
+      if (counter >= limit) { counter = limit; }
+    }
+    else {
+      counter -= step;
+      if (counter <= limit) { counter = limit; }
+    }
+
+    return counter;
+  }
+
 
   Train.prototype.continue = function() {
-    if (this.status == 'decel') {
-      if (this.container.vx - this.action.step <= 0) {
-        this.container.vx = 0;
-        this.status = 'idle';
-      }
-      else {
-        this.container.vx -= this.action.step;
-      }
-    }
-    else if (this.status == 'acel') {
-      if (this.container.vx + this.action.step >= this.action.final) {
+    if (['decel', 'acel'].indexOf(this.status) >= 0) {
+      // Increment by the step.
+      this.container.vx = (this.status == 'acel')
+        ? this.step(true, this.container.vx, this.action.step, this.action.final)
+        : this.step(false, this.container.vx, this.action.step, this.action.final);
+
+      console.log('vx: ', this.container.vx);
+
+      // When we meet or surpass our limit, end this status.
+      if (this.container.vx === this.action.final) {
         this.container.vx = this.action.final;
         this.status = 'idle';
       }
-      else {
-        this.container.vx += this.action.step;
-      }
     }
-    else if (this.status == 'unload' || this.status == 'load') {
+    else if (this.status == 'maintain') {
+      this.container.vx += this.action.step;
+    }
+    else if (this.status == 'unload' || this.status == 'load'
+      || this.status == 'doors_open' || this.status == 'doors_close') {
       if (this.action.final <= 0) {
         this.status = 'idle';
       }
@@ -199,135 +260,86 @@ var rtrain = (function rTrainFactory() {
     return (this.status === 'idle') ? false : true;
   }
 
-  Train.prototype.update = function(track) {
+
+  /**
+   * State update step to update the train in each step of the game loop.
+   *
+   * @param  {Track} track
+   *   The track object this train lives in. Used to get track info,
+   *   such as signals, speed, stop markers, etc.
+   */
+  Train.prototype.state = function state(track) {
+
+    console.log(' ... ', this.status);
 
     // Accel / Decel
     if (['load', 'unload', 'doors_open', 'doors_close'].indexOf(this.status) >= 0) {
-
+      return this.continue();
     }
 
     // Get next destination.
-    // Get signal of current segment.
-    // Get signal of enxt segment.
+    var destination = track.getTrainDestination(this.id, this.car_count, this.container.x);
 
-    // Scenarios:
-    // 1. Stopped for load/unload
-    // 2. Stopped for signal.
-    // 3. Stopping for signal.
-    // 4. Speeding up for speed limit.
-    // 5. 
+    // Get speed of current segment.
+    var speed = track.getSpeedLimit(null, this.container.x, this.id);
 
+    // How far away are we?
+    var distance_remaining = (this.direction == 'e')
+      ? this.container.x - destination
+      : destination - this.container.x;
 
-    // What is out current status?
-    // If we are stopped, or stopping, continue.
+    // At the current speed, what distance will it take to stop at our destination?
+    var my_stop_distance = rutils.calculateStoppingDistance(this.container.vx, this.decel_step.normal);
 
-    // Check for next destination.
-    
-    // Should we slow down? Speed up?
-    
-    //
 
-
-
-
-
-
-
-      /**
-       
-
-
-
-
-
-        @TODO
-
-          Start logic to get train moving,and responding to signals.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-       */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    console.log('Distance to target stop:', my_stop_distance);
 
     /**
-     * Stopping:
-     * 1. Where is our next stop?
-     * 2. Check the current speed limit.
-     * 3. Given our speed, how long will it take to stop?
-     * 4. Proceed until we should begin stopping.
-     *
-     * Starting:
-     * 1. When is our next stop, if any?
-     * 2. Check the current speed limit.
-     * 3. Begin acceleration to speed limit.
-     *
-     * Continuing:
-     * 1. Check the current speed limit.
-     * 2. Adjust our current speed to accomodate for speed limit.
+       @TODO
+         Check if this is aggressive enough, or if we should reduce faster.
      */
+    // Close to target. Stop now.
+    if (my_stop_distance >= destination) {
+      // Stop / Decel
+      this.decel(0, this.decel_step.normal);
+    }
 
+    /**
+       @TODO
+         If we're close to our stopping distance, reduce to caution speed.
+     */
+    // Far from target. Speed up.
+    else if (my_stop_distance < (destination*0.5)) {
+      if (this.container.vx < speed) {
+        // Accelerate to speed.
+        this.acel(speed, this.decel_step.normal);
+      }
+      else if (this.container.vx > speed) {
+        // Decel to speed.
+        this.decel(speed, this.decel_step.normal);
+      }
+      else {
+        // Continue unchanged.
+        this.maintain(speed);
+      }
+    }
 
-    // get status.
-    if (this.status == 'waiting' || this.status == 'idle') {
-      this.nextAction();
-    }
-    else if (this.status !== false) {
-      this.continue();
-    }
-    else {
-      console.log('Nope.');
-    }
+    // Perform the update.
+    this.continue();
   }
 
+
+  /**
+   * Add a single car to the train, including graphics.
+   *
+   * @param  {string} file_name
+   *   File name of existing textureCache for the train car.
+   * @param  {int} car_num
+   *   The car number from the front of the train.
+   *
+   * @return {Pixi Item}
+   *   Car pixi item to be added to the train container.
+   */
 	function setupCar(file_name, car_num) {
 
     // Our train png.
@@ -347,6 +359,16 @@ var rtrain = (function rTrainFactory() {
 		return my_car;
 	}
 
+
+  /**
+   * Assemble a train container, with cars and images specified in constructor.
+   *
+   * @param  {int} position
+   *   Position on the track where train should be set.
+   *
+   * @return {PIXI Container}
+   *   Complete train to be added as a container/child of the track.
+   */
   Train.prototype.render = function render(position) {
 
     var car = [];
