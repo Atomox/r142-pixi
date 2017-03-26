@@ -526,8 +526,6 @@ var rtrack = (function() {
 
 	Track.prototype.renderSegment = function renderSegment(id, offset_x, offset_y) {
 
-		console.log('Renderinging track segment', id, ' with offsets:',offset_x,offset_y);
-
     // Marker for start of track segment.
     var message = new PIXI.Text(id, {fontFamily: "Helevetica", fontSize: 64, fill: "gray"});
 
@@ -539,7 +537,6 @@ var rtrack = (function() {
 		for (var i = 0; i < markers.length; i++) {
 			var marker = this.renderer.stopMarker(markers[i].cars, markers[i].x + offset_x, offset_y);
 			this.container.addChild(marker);
-			console.log('Adding marker in segment', id, marker);
 		}
 
 		// Fetch and render all signals.

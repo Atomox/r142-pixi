@@ -178,7 +178,7 @@ var rtrain = (function rTrainFactory() {
     this.action = {
       init: this.container.vx,
       type: 'decel',
-      final: (['n','e'].indexOf(this.direction) >= 0) ? final : final,
+      final: final,
       step: step
     };
   }
@@ -188,7 +188,7 @@ var rtrain = (function rTrainFactory() {
     this.action = {
       type: 'acel',
       init: this.container.vx,
-      final: (['n','e'].indexOf(this.direction) >= 0) ? -final : final,
+      final: final,
       step: step
     };
   }
@@ -211,6 +211,10 @@ var rtrain = (function rTrainFactory() {
    * @return {[type]}           [description]
    */
   Train.prototype.step = function step(acel, counter, step, limit) {
+    if (counter < 0) {
+      console.warn(counter, ' is below zero');
+    }
+
     if (acel == true) {
       counter += step;
       if (counter >= limit) { counter = limit; }
@@ -241,13 +245,13 @@ var rtrain = (function rTrainFactory() {
           this.status = 'idle';
         }
         else {
-          console.log('Setting to maintain.');
+          console.log(this.action.final, 'reached. Setting to maintain.');
           this.maintain(this.action.final);
         }
       }
     }
     else if (this.status == 'maintain') {
-      this.container.vx += this.action.step;
+      this.container.vx = this.action.step;
     }
     else if (this.status == 'unload' || this.status == 'load'
       || this.status == 'doors_open' || this.status == 'doors_close') {
@@ -270,7 +274,7 @@ var rtrain = (function rTrainFactory() {
 
 
     this.container.vy = 0;
-    this.container.x += (this.direction == 'w') ? -this.container.vx : this.container.vx;
+    this.container.x += (this.direction == 'e') ? -this.container.vx : this.container.vx;
     this.container.y += this.container.vy;
 
     return (this.status === 'idle') ? false : true;
@@ -334,7 +338,7 @@ var rtrain = (function rTrainFactory() {
     // Far from target. Speed up.
     else if (my_stop_distance < (destination.distance*0.5)) {
       if (this.container.vx < speed) {
-        if (this.status !== 'acel') { console.log(this.id, this.status, ': Accel...'); }
+        if (this.status !== 'acel') { console.log(this.id, this.status, ': Accel... from', this.container.vx, 'to ', speed); }
         // Accelerate to speed.
         this.acel(speed, this.decel_step.normal);
       }

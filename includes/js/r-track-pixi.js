@@ -15,8 +15,6 @@ var rtrackpixi = (function() {
 		 */
 		my_stop.position.y = y; // - my_stop.height; // y - 70 - my_stop.height
 
-		console.log('Adding stop marker at: ', my_stop.position);
-
 		my_stop.scale.y = .35;
 		my_stop.scale.x = .35;
 

@@ -56,12 +56,12 @@ var rutils = (function() {
 
 		return false;
 	}
-	function calculateStoppingDistance(velocity, decel_rate, direction) {
+	function calculateStoppingDistance(velocity, decel_rate) {
 		var distance = 0;
 
 		if (velocity > 0) {
 			while (velocity > 0) {
-				distance += speed;
+				distance += velocity;
 				velocity -= decel_rate;
 			}
 		}

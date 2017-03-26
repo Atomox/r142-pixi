@@ -80,40 +80,6 @@ var rsystem = (function() {
 			}
 		}
 
-/**
-		// East-bound:
-		if (station.trackStatus(0) == true && typeof trains_east[east_bound] !== 'undefined') {
-			console.log('Scheduling train');
-
-		  // Schedule a train.
-		  station.scheduleTrain(0, trains_east[east_bound]);
-			east_bound++;
-		}
-		else if (station.trackStatus(0) == true) {
-			console.log('Track 0 is free');
-		}
-
-		// West-bound:
-		if (station.trackStatus(1) == true && typeof trains_west[west_bound] !== 'undefined') {
-			console.log('Scheduling train');
-
-		  // Schedule a train.
-		  station.scheduleTrain(1, trains_west[west_bound]);
-			west_bound++;
-		}
-		else if (station.trackStatus(1) == true) {
-			console.log('Track 1 is free');
-		}
-
-
-		if (typeof trains_east[east_bound-1] !== 'undefined') {
-			trains_east[east_bound-1].update();
-		}
-		if (typeof trains_west[west_bound-1] !== 'undefined') {
-			trains_west[west_bound-1].update();
-		}
-*/
-
 	  return true;
 	}
 
@@ -175,8 +141,6 @@ var rsystem = (function() {
 				y1-my_track.position.y1,
 				y2-my_track.position.y1
 			);
-
-			console.log('Moving Track container to coords:',x1 + my_track.position.x1,x1 + my_track.position.x1);
 
 			my_track_container.x = x1 + my_track.position.x1;
 			my_track_container.y = y1 + my_track.position.y1;
