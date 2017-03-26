@@ -2,7 +2,8 @@
 
 var rtrain = (function rTrainFactory() {
 
-  function Train(left, right, car_count) {
+  function Train(id, left, right, car_count) {
+    this.id = id;
     this.container = new PIXI.Container();
     this.status = 'waiting';
     this.direction = 'e';
@@ -119,13 +120,18 @@ var rtrain = (function rTrainFactory() {
     return this.status;
   }
 
-/**
   Train.prototype.velocity = function(x,y) {
     this.container.vx = x;
     this.container.vy = y;
-    this.status = 'velocity';
   }
-*/
+
+  Train.prototype.waiting = function() {
+    this.velocity(0,0);
+    this.status = 'waiting';
+    this.action = {
+      type: 'waiting'
+    };
+  }
 
   Train.prototype.unload = function(final, step) {
     this.velocity(0,0);
@@ -172,7 +178,7 @@ var rtrain = (function rTrainFactory() {
     this.action = {
       init: this.container.vx,
       type: 'decel',
-      final: (['n','e'].indexOf(this.direction) >= 0) ? -final : final,
+      final: (['n','e'].indexOf(this.direction) >= 0) ? final : final,
       step: step
     };
   }
@@ -225,12 +231,19 @@ var rtrain = (function rTrainFactory() {
         ? this.step(true, this.container.vx, this.action.step, this.action.final)
         : this.step(false, this.container.vx, this.action.step, this.action.final);
 
-      console.log('vx: ', this.container.vx);
-
       // When we meet or surpass our limit, end this status.
       if (this.container.vx === this.action.final) {
         this.container.vx = this.action.final;
-        this.status = 'idle';
+        console.log('Reached final', this.status, 'of',this.action.final,'.');
+
+        if (this.action.final === 0) {
+          console.log('Setting to idle.');
+          this.status = 'idle';
+        }
+        else {
+          console.log('Setting to maintain.');
+          this.maintain(this.action.final);
+        }
       }
     }
     else if (this.status == 'maintain') {
@@ -247,6 +260,9 @@ var rtrain = (function rTrainFactory() {
     }
     else if (this.status == 'velocity'){
       this.status = 'idle';
+    }
+    else if (this.status == 'waiting') {
+      this.status = 'waiting';
     }
     else {
       console.log('Continue: Unknown action: ', this.status);
@@ -270,8 +286,6 @@ var rtrain = (function rTrainFactory() {
    */
   Train.prototype.state = function state(track) {
 
-    console.log(' ... ', this.status);
-
     // Accel / Decel
     if (['load', 'unload', 'doors_open', 'doors_close'].indexOf(this.status) >= 0) {
       return this.continue();
@@ -285,23 +299,32 @@ var rtrain = (function rTrainFactory() {
 
     // How far away are we?
     var distance_remaining = (this.direction == 'e')
-      ? this.container.x - destination
-      : destination - this.container.x;
+      ? this.container.x - destination.distance
+      : destination.distance - this.container.x;
 
     // At the current speed, what distance will it take to stop at our destination?
     var my_stop_distance = rutils.calculateStoppingDistance(this.container.vx, this.decel_step.normal);
-
-
-    console.log('Distance to target stop:', my_stop_distance);
 
     /**
        @TODO
          Check if this is aggressive enough, or if we should reduce faster.
      */
     // Close to target. Stop now.
-    if (my_stop_distance >= destination) {
+    if (my_stop_distance !== 0 && my_stop_distance >= destination.distance) {
+      if (this.status !== 'decel') { console.log(this.id, '(', this.status, '): Decel to stop...'); }
       // Stop / Decel
       this.decel(0, this.decel_step.normal);
+    }
+    else if (my_stop_distance === 0 && my_stop_distance >= destination.distance) {
+      if (destination.type == 'stop_marker') {
+        if (this.status !== 'doors_open') { console.log(this.id, '(', this.status, '): Doors Opening...'); }
+        console.log('Stop Marker...');
+      }
+      else {
+        if (this.status !== 'waiting') { console.log(this.id, '(', this.status, '): Waiting...'); }
+        this.waiting();
+        console.log(this.id, 'Waiting for ...', destination.type, ' -- My stop dist:', my_stop_distance, ', My destination dist:', destination.distance, ' My pos:', this.container.x);
+      }
     }
 
     /**
@@ -309,16 +332,19 @@ var rtrain = (function rTrainFactory() {
          If we're close to our stopping distance, reduce to caution speed.
      */
     // Far from target. Speed up.
-    else if (my_stop_distance < (destination*0.5)) {
+    else if (my_stop_distance < (destination.distance*0.5)) {
       if (this.container.vx < speed) {
+        if (this.status !== 'acel') { console.log(this.id, this.status, ': Accel...'); }
         // Accelerate to speed.
         this.acel(speed, this.decel_step.normal);
       }
       else if (this.container.vx > speed) {
+        if (this.status !== 'decel') { console.log(this.id, ': Decel...'); }
         // Decel to speed.
         this.decel(speed, this.decel_step.normal);
       }
       else {
+        if (this.status !== 'maintain') { console.log(this.id, ': Maintain...', speed, destination); }
         // Continue unchanged.
         this.maintain(speed);
       }

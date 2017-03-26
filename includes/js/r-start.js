@@ -4,7 +4,7 @@ var system = null,
 	stations = [],
 	tracks = [],
   screen = {
-  	width: 8092,
+  	width: 16092,
   	height: 384
   };
 
@@ -29,14 +29,14 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.assembleFrame(0,0, screen.width, screen.height);
 
 		// Init train 0.
-		trains_east[0] = new rtrain.Train('R142-left.png', 'R142-right.png', 4);
-		trains_east[1] = new rtrain.Train('R142-left.png', 'R142-right.png', 4);
+		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 4);
+		trains_east[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 4);
 
 		// Add train to 0, at position 0.
-		system.addTrain(0, 500, trains_east[0]);
+		system.addTrain(0, 10000, trains_east[0]);
 
 		// Add train to track 0, at position 5000.
-		system.addTrain(0, 8000,trains_east[1]);
+		system.addTrain(0, 24000,trains_east[1]);
 
 		gameLoop();
 	});
