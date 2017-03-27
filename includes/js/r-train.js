@@ -309,17 +309,28 @@ var rtrain = (function rTrainFactory() {
     // At the current speed, what distance will it take to stop at our destination?
     var my_stop_distance = rutils.calculateStoppingDistance(this.container.vx, this.decel_step.normal);
 
+    if (destination.type == 'stop_marker' && this.id == 0) {
+      console.log(this.id, 'STOP MARKER -- ',
+        '  x:', this.container.x,
+        ', Destination:', destination.distance,
+        ', Distance Remaining:', distance_remaining,
+        ', distance to stop: ', my_stop_distance);
+    }
+
     /**
        @TODO
          Check if this is aggressive enough, or if we should reduce faster.
      */
     // Close to target. Stop now.
-    if (my_stop_distance !== 0 && my_stop_distance >= destination.distance) {
+    if (my_stop_distance > 0 && my_stop_distance >= distance_remaining) {
       if (this.status !== 'decel') { console.log(this.id, '(', this.status, '): Decel to stop...'); }
       // Stop / Decel
       this.decel(0, this.decel_step.normal);
     }
-    else if (my_stop_distance === 0 && my_stop_distance >= destination.distance) {
+    else if (distance_remaining <= my_stop_distance && my_stop_distance > 0) {
+      console.log('YOU MISSED YOUR STOP.');
+    }
+    else if (my_stop_distance <= 0 && my_stop_distance >= destination.distance) {
       if (destination.type == 'stop_marker') {
         if (this.status !== 'doors_open') { console.log(this.id, '(', this.status, '): Doors Opening...'); }
         console.log('Stop Marker...');

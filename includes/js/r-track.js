@@ -235,7 +235,7 @@ var rtrack = (function() {
 				for (var n = 0; n < this.segments[i].stopmarker.length; n++) {
 					if (this.segments[i].stopmarker[n].cars == num_cars) {
 						return {
-							distance: this.getDistanceToSegment(i) + x,
+							distance: this.getDistanceToSegment(i) + this.segments[i].stopmarker[n].x,
 							type: 'stop_marker'
 						}
 					}
