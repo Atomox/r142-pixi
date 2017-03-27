@@ -292,6 +292,13 @@ var rtrain = (function rTrainFactory() {
     this.container.x += (this.direction == 'e') ? -this.container.vx : this.container.vx;
     this.container.y += this.container.vy;
 
+    if (this.container.x < 0) {
+      this.container.x = 0;
+    }
+    else if (this.container.x > this.container.length) {
+      this.container.x = this.container.lengthl
+    }
+
     return (this.status === 'idle') ? false : true;
   }
 

@@ -279,6 +279,9 @@ var rtrack = (function() {
 				}
 			}
 		}
+		else {
+			console.warn('Not in track.', x);
+		}
 
 		return false;
 	}
@@ -589,7 +592,7 @@ var rtrack = (function() {
 	Track.prototype.renderSegment = function renderSegment(id, offset_x, offset_y) {
 
     // Marker for start of track segment.
-    var message = new PIXI.Text(id, {fontFamily: "Helevetica", fontSize: 64, fill: "gray"});
+    var message = new PIXI.Text(id, {fontFamily: "Helevetica", fontSize: 256, fill: "gray"});
 
     message.position.set(offset_x, offset_y);
     this.container.addChild(message);
