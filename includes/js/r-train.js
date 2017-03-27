@@ -23,9 +23,14 @@ var rtrain = (function rTrainFactory() {
     };
   }
 
+
+  Train.prototype.getPosition = function() {
+    return this.container.x;
+  }
+
+
   Train.prototype.getLength = function() {
     if (typeof this.container !== 'undefined') {
-      console.log('train.getLength:', this.container.width);
       return this.container.width;
     }
     return 0;
@@ -134,6 +139,7 @@ var rtrain = (function rTrainFactory() {
   }
 
   Train.prototype.unload = function(final, step) {
+    console.log('Unloading');
     this.velocity(0,0);
     this.status = 'unload';
     this.action = {
@@ -144,6 +150,7 @@ var rtrain = (function rTrainFactory() {
   }
 
   Train.prototype.doors_open = function(final, step) {
+    console.log('Doors Opening');
     this.velocity(0,0);
     this.status = 'doors_open';
     this.action = {
@@ -154,6 +161,7 @@ var rtrain = (function rTrainFactory() {
   }
 
   Train.prototype.doors_close = function(final, step) {
+    console.log('Doors Closing');
     this.velocity(0,0);
     this.status = 'doors_close';
     this.action = {
@@ -164,6 +172,7 @@ var rtrain = (function rTrainFactory() {
   }
 
   Train.prototype.load = function(final, step) {
+    console.log('Loading');
     this.velocity(0,0);
     this.status = 'load';
     this.action = {
@@ -256,7 +265,13 @@ var rtrain = (function rTrainFactory() {
     else if (this.status == 'unload' || this.status == 'load'
       || this.status == 'doors_open' || this.status == 'doors_close') {
       if (this.action.final <= 0) {
-        this.status = 'idle';
+        switch (this.status) {
+          case 'doors_open': this.unload(10, .05); break;
+          case 'unload': this.load(10, .05); break;
+          case 'load': this.doors_close(5, .05); break;
+          case 'doors_close':
+          default: this.status = 'departure';
+        }
       }
       else {
         this.action.final -= this.action.step;
@@ -269,7 +284,7 @@ var rtrain = (function rTrainFactory() {
       this.status = 'waiting';
     }
     else {
-      console.log('Continue: Unknown action: ', this.status);
+      //console.log('Continue: Unknown action: ', this.status);
     }
 
 
@@ -290,32 +305,71 @@ var rtrain = (function rTrainFactory() {
    */
   Train.prototype.state = function state(track) {
 
-    // Accel / Decel
+    // 1. Boarding sequence continues without this function.
     if (['load', 'unload', 'doors_open', 'doors_close'].indexOf(this.status) >= 0) {
       return this.continue();
     }
 
-    // Get next destination.
-    var destination = track.getTrainDestination(this.id, this.car_count, this.container.x);
+    // 2. Check destination.
+    // Did we reach or pass our destination?
+    if (typeof this.destination !== 'undefined'
+      && rutils.passedDestination(this.destination.x,this.container.x,this.direction)) {
+
+      // If arrival procedure complete, find next destination.
+      if (this.status == 'departure') {
+        // Get next destination.
+        this.destination = track.getTrainDestination(this.id, this.car_count, this.container.x, true);
+        console.log('DEPARTURE:', this.destination, this.container.x);
+      }
+      // If arrival, begin unboarding procedure.
+      else if (this.destination.type == 'stop_marker') {
+        if (['idle', 'waiting'].indexOf(this.status) >= 0) { console.log(this.id, '(', this.status, '): Arrival'); }
+        console.log('Stop Marker...');
+        this.doors_open(5, .05);
+        return this.continue();
+      }
+      else if (this.destination.type == 'eol') {
+        if (['idle', 'waiting'].indexOf(this.status) < 0) { console.log(this.id, '(', this.status, '): End of Line'); }
+      }
+      // In all other cases, get the next destination.
+      else {
+        console.warn('Past destination, but did not match scenarios.');
+        this.destination = null;
+      }
+    }
+
+    // If no destination, get one.
+    if (typeof this.destination === 'undefined' || this.destination === null) {
+      this.destination = track.getTrainDestination(this.id, this.car_count, this.container.x);
+    }
+
+
+    // 3. Does signal traffic overrtide our destination?
+    // Is there a red signal? If so, stop, but don't change destination.
+    var signal_status = track.getSignalDestination(this.id, this.car_count, this.container.x);
+    var destination = (signal_status !== false) ? signal_status : this.destination;
+
+    if (signal_status !== false) {
+      console.log(this.id, 'RED SIGNAL in segment: ', signal_status.segment);
+    }
+
+
+    // 4. Get speed, distance to destination, and stopping distance.
 
     // Get speed of current segment.
     var speed = track.getSpeedLimit(null, this.container.x, this.id);
 
     // How far away are we?
     var distance_remaining = (this.direction == 'e')
-      ? this.container.x - destination.distance
-      : destination.distance - this.container.x;
+      ? this.container.x - destination.x
+      : destination.x - this.container.x;
 
     // At the current speed, what distance will it take to stop at our destination?
     var my_stop_distance = rutils.calculateStoppingDistance(this.container.vx, this.decel_step.normal);
 
-    if (destination.type == 'stop_marker' && this.id == 0) {
-      console.log(this.id, 'STOP MARKER -- ',
-        '  x:', this.container.x,
-        ', Destination:', destination.distance,
-        ', Distance Remaining:', distance_remaining,
-        ', distance to stop: ', my_stop_distance);
-    }
+
+
+    // 5. Determine if we should change actions.
 
     /**
        @TODO
@@ -327,19 +381,26 @@ var rtrain = (function rTrainFactory() {
       // Stop / Decel
       this.decel(0, this.decel_step.normal);
     }
-    else if (distance_remaining <= my_stop_distance && my_stop_distance > 0) {
-      console.log('YOU MISSED YOUR STOP.');
-    }
-    else if (my_stop_distance <= 0 && my_stop_distance >= destination.distance) {
-      if (destination.type == 'stop_marker') {
-        if (this.status !== 'doors_open') { console.log(this.id, '(', this.status, '): Doors Opening...'); }
-        console.log('Stop Marker...');
+
+    /**
+       @TODO
+
+         Handle stopping for signals vs stopping for stop_markers vs eol.
+
+         How do we re-accel once we're arrived, and just changed to the next destination.
+     */
+    // If arrival. // && this.container.x <= destination.distance
+    else if (my_stop_distance <= 0 && distance_remaining <= 0
+      && ['stop_marker', 'eol'].indexOf(destination.type) < 0) {
+      if (this.status !== 'waiting') {
+        console.log(this.id, '(', this.status, '): Waiting... for ', destination.type);
+        console.log(this.id, "Waiting for ...", destination.type,
+          ' -- My stop dist:', my_stop_distance,
+          ', My destination dist:', destination.x,
+          ', My distance remaining:', distance_remaining,
+          ' My pos:', this.container.x);
       }
-      else {
-        if (this.status !== 'waiting') { console.log(this.id, '(', this.status, '): Waiting...'); }
-        this.waiting();
-        console.log(this.id, 'Waiting for ...', destination.type, ' -- My stop dist:', my_stop_distance, ', My destination dist:', destination.distance, ' My pos:', this.container.x);
-      }
+      this.waiting();
     }
 
     /**
@@ -347,7 +408,7 @@ var rtrain = (function rTrainFactory() {
          If we're close to our stopping distance, reduce to caution speed.
      */
     // Far from target. Speed up.
-    else if (my_stop_distance < (destination.distance*0.5)) {
+    else if (my_stop_distance < (distance_remaining * 0.5)) {
       if (this.container.vx < speed) {
         if (this.status !== 'acel') { console.log(this.id, this.status, ': Accel... from', this.container.vx, 'to ', speed); }
         // Accelerate to speed.
@@ -362,6 +423,11 @@ var rtrain = (function rTrainFactory() {
         if (this.status !== 'maintain') { console.log(this.id, ': Maintain...', speed, destination); }
         // Continue unchanged.
         this.maintain(speed);
+      }
+    }
+    else {
+      if (this.status == 'idle' && destination.type == "stop_marker") {
+        console.log('Stop Marker...');
       }
     }
 

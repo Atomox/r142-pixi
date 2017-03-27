@@ -149,8 +149,8 @@ var rtrack = (function() {
 	 * @param  {array[obj]} id
 	 *   One or more segment IDs.
 	 */
-	Track.prototype.resetSegmentOccupied = function resetSegmentOccupiedt(id) {
-		if (typeof id === 'number') {	id = [id]; }
+	Track.prototype.resetSegmentOccupied = function resetSegmentOccupied(id) {
+		if (typeof id === 'number') {	id = [{id: id}]; }
 
 		for (var i = 0; i < id.length; i++) {
 			this.segments[id[i].id].occupied = false;
@@ -203,8 +203,10 @@ var rtrack = (function() {
 	 * @return {int}
 	 *   The location of the next stopping point.
 	 */
-	Track.prototype.getTrainDestination = function getTrainDestination(train_id, num_cars, x) {
-		
+	Track.prototype.getTrainDestination = function getTrainDestination(train_id, num_cars, x, get_next) {
+
+		if (get_next === true) { console.log('get Next');}
+
 		// If we're inside the track bounds, check segments.
 		if (this.inTrackBounds(x)) {
 
@@ -212,16 +214,6 @@ var rtrack = (function() {
 			var my_segments = this.getSegmentsByBounds(x, x+1);
 			if (typeof my_segments !== 'object' || my_segments === null || my_segments.length <= 0) {
 				throw new Error('Train Destination cannot calculate due to missing segments.');
-			}
-
-			// Check signal. If red, stop in this segment,
-			// as next segment will be occupied.
-			if (this.getSignalStatus(train_id, my_segments[0].id) === -1) {
-				// Distance to start for n/e, otherwise distance to end of segment.
-				return {
-					distance: this.getDistanceToSegment(my_segments[0].id) + (['n','e'].indexOf(this.direction) >= 0) ? my_segments[0].distance : 0,
-					type: 'signal'
-				}
 			}
 
 			// Otherwise, check for track stop marker.
@@ -234,9 +226,23 @@ var rtrack = (function() {
 				// Check for a stop marker matching our car number.
 				for (var n = 0; n < this.segments[i].stopmarker.length; n++) {
 					if (this.segments[i].stopmarker[n].cars == num_cars) {
-						return {
-							distance: this.getDistanceToSegment(i) + this.segments[i].stopmarker[n].x,
-							type: 'stop_marker'
+						var my_distance = this.getDistanceToSegment(i) + this.segments[i].stopmarker[n].x;
+
+						// Return any markers we have not already passed.
+						if (get_next === true) {
+							if ((['n', 'e'].indexOf(this.direction) >= 0 && my_distance <= x)
+								|| (['s', 'w'].indexOf(this.direction) >= 0 && my_distance >= x)) {
+								return {
+									x: my_distance,
+									type: 'stop_marker'
+								}
+							}
+						}
+						else {
+							return {
+									x: my_distance,
+									type: 'stop_marker'
+								}
 						}
 					}
 				}
@@ -245,9 +251,36 @@ var rtrack = (function() {
 
 		// Otherwise check for end of track.
 		return {
-			distance: (['n','e'].indexOf(this.direction) >= 0) ? x : this.getLength() - x,
+			x: (['n','e'].indexOf(this.direction) >= 0) ? 0 : this.getLength(),
 			type: 'eol'
 		}
+	}
+
+
+	Track.prototype.getSignalDestination = function getSignalDestination(train_id, num_cars, x) {
+		if (this.inTrackBounds(x)) {
+
+			// Get train front location.
+			var my_segments = this.getSegmentsByBounds(x, x+1);
+			if (typeof my_segments !== 'object' || my_segments === null || my_segments.length <= 0) {
+				throw new Error('Train Destination cannot calculate due to missing segments.');
+			}
+
+			// Check signal. If red, stop in this segment,
+			// as next segment will be occupied.
+			if (this.getSignalStatus(train_id, my_segments[0].id) === -1) {
+
+				// Distance to start for n/e, otherwise distance to end of segment.
+				return {
+					x: this.getDistanceToSegment(my_segments[0].id) + (['n','e'].indexOf(this.direction) >= 0) 
+						? my_segments[0].distance : 0,
+					type: 'signal',
+					segment: my_segments[0].id,
+				}
+			}
+		}
+
+		return false;
 	}
 
 
@@ -437,9 +470,11 @@ var rtrack = (function() {
 		}
 
 		if (this.state_counter == 10) {
+
 //			console.log('Updating platforms and signal Visuals.');
 
 			// Update signals.
+			this.refreshSignals();
 
 			// Update platforms.
 
@@ -453,23 +488,50 @@ var rtrack = (function() {
 
 		/**
 
-
-
 		   @TODO
 
 		    SLOW DOWN TIME SO WE CAN SEE WHAT'S HAPPENING.
 
-
-
 		 */
-
-
 		// Wait 1000 miliseconds before continueing.
 //		var dt = new Date();
 //		while ((new Date()) - dt <= 5000) { /* Do nothing */ }
 
 		return true;
 	}
+
+
+	/**
+	 * Update all signals in the system.
+	 */
+	Track.prototype.refreshSignals = function refreshSignals() {
+		var occupied_segments = [];
+
+		for (var i = 0; i < this.trains.length; i++) {
+			if (typeof this.trains[i] !== 'undefined') {
+				var position = this.trains[i].getPosition();
+
+				// Get all segments this train would occupy.
+				var my_segments = this.getSegmentsByBounds(position, position + this.trains[i].getLength());
+				for (var j = 0; j < my_segments.length; j++) {
+					occupied_segments.push(my_segments[j].id);
+				}
+
+				// Assign the train to these track segments.
+				this.setSegmentOccupied(my_segments, i);
+			}
+		}
+
+//		console.log('Occupied:', occupied_segments);
+
+		// Reset all segment signals not in our updated occupied list.
+		for (var j = 0; j < this.segments.length; j++) {
+			if (occupied_segments.indexOf(j) < 0) {
+				this.resetSegmentOccupied(j);
+			}
+		}
+	}
+
 
 	/**
 	 * Render the track.

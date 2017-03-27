@@ -68,10 +68,23 @@ var rutils = (function() {
 
 		return distance;
 	}
+
+	function passedDestination(dest_x, x, direction) {
+		if (
+			(['n', 'e'].indexOf(direction) >= 0 && dest_x > x)
+			|| (['s', 'w'].indexOf(direction) >= 0 && dest_x < x)
+			) {
+			return true;
+		}
+
+		return false;
+	}
+
 	return {
 		intersection: checkForIntersection,
 		boxIntersection: checkForBoxIntersection,
-		calculateStoppingDistance: calculateStoppingDistance
+		calculateStoppingDistance: calculateStoppingDistance,
+		passedDestination: passedDestination
 	};
 
 })();
