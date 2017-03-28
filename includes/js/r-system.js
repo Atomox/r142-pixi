@@ -89,6 +89,10 @@ var rsystem = (function() {
 			throw new Error('viewport width/height must be positive integers.');
 		}
 
+		// Move the stage to our passed origin.
+		system.stage.x -= x1;
+		system.stage.y -= y1;
+
 		var x2 = x1 + width,
 				y2 = y1 + height;
 
@@ -142,8 +146,8 @@ var rsystem = (function() {
 				y2-my_track.position.y1
 			);
 
-			my_track_container.x = x1 + my_track.position.x1;
-			my_track_container.y = y1 + my_track.position.y1;
+			my_track_container.x = my_track.position.x1;
+			my_track_container.y = my_track.position.y1;
 
 			// Add the track container to the stage.
 			this.stage.addChild(my_track_container);

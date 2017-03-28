@@ -69,6 +69,21 @@ var rtrack = (function() {
 		this.segments[id].direction = settings.direction;
 		this.segments[id].speed = (typeof settings.speed === 'number') ? settings.speed : 20;
 		this.segments[id].occupied = false;
+		this.segments[id].signals = {};
+
+		// Set a signal every 500 feet.
+		for (var i = 0; i < settings.length; i += 750) {
+			this.addSignal(id, i);
+		}
+	}
+
+
+	Track.prototype.addSignal = function addSignal(sid, offset) {
+		if (typeof this.segments[sid].signals[offset] === 'undefined') {
+			this.segments[sid].signals[offset] = {
+				position: offset
+			};
+		}
 	}
 
 
@@ -318,7 +333,7 @@ var rtrack = (function() {
 	 *   A number representing the max speed allowed in our current segment.
 	 */
 	Track.prototype.getSpeedLimit = function speedLimit(sid, x, train_id) {
-		
+
 		if (sid || this.inTrackBounds(x)) {
 			if (typeof sid !== 'number' || sid < 0) {
 				var my_seg = this.getSegmentsByBounds(x, x+1);
@@ -457,6 +472,11 @@ var rtrack = (function() {
 		}
 		return false;
 	}
+	Track.prototype.getSignals = function getSignals(id) {
+		if (typeof this.segments[id].signals !== 'undefined') {
+			return this.segments[id].signals;
+		}
+	}
 	Track.prototype.getTrackDirection = function direction() {	return this.direction; }
 
 	Track.prototype.state = function state() {
@@ -476,6 +496,7 @@ var rtrack = (function() {
 
 			// Update signals.
 			this.refreshSignals();
+			this.refreshSignalUi();
 
 			// Update platforms.
 
@@ -523,12 +544,20 @@ var rtrack = (function() {
 			}
 		}
 
-//		console.log('Occupied:', occupied_segments);
-
 		// Reset all segment signals not in our updated occupied list.
 		for (var j = 0; j < this.segments.length; j++) {
 			if (occupied_segments.indexOf(j) < 0) {
 				this.resetSegmentOccupied(j);
+			}
+		}
+	}
+
+
+	Track.prototype.refreshSignalUi = function refreshSignalUi() {
+		for (var sid = 0; sid < this.segments.length; sid++) {
+			// Fetch and render all signals.
+			for (var j in this.segments[sid].signals) {
+				this.renderSignal(sid, j);
 			}
 		}
 	}
@@ -553,14 +582,15 @@ var rtrack = (function() {
 
 		console.log('Rendering tracks from: ', x1, x2);
 
+		// Horizontal ruler.
 		for (var a = x1; a < x2; a += 100) {
-			// Ruler.
 	    var message = new PIXI.Text(a, {fontFamily: "Helvetica", fontSize: 12, fill: "gray"});
 	    message.position.set(a, this.height - message.height);
 			this.container.addChild(message);
 		}
+
+		// Vertical rules.
 		for (var b = 0; b < this.height; b += 20) {
-			// Ruler.
 	    var message = new PIXI.Text((y1+b) + ', ' + b, {fontFamily: "Helvetica", fontSize: 12, fill: "gray"});
 	    message.position.set(0, b-message.height);
 			this.container.addChild(message);
@@ -569,8 +599,6 @@ var rtrack = (function() {
 		// Detemrine which segments fall within our view port.
 		var my_segments = this.getSegmentsByBounds(x1,x2);
 
-		console.log('Segments within bounds of', x1,x2,y1,y2, ': ', my_segments);
-
 		// Render each segment, accounting for offsets.
 		for (var i = 0; i < my_segments.length; i++) {
 			console.log('adjusting coords to local: ', x1, my_segments[i].distance, 'y:', y1);
@@ -578,20 +606,22 @@ var rtrack = (function() {
 			this.renderSegment(my_segments[i].id,offset_x,0);
 		}
 
-		/**
-		   @TODO
-
-		     Set this.container to x1,x2
-		 */
-
 		return this.container;
 	}
 
+	/**
+	 * Render a single segment of the track.
+	 *
+	 * @param  {int} id
+	 *   The segment ID.
+	 * @param  {int} offset_x, offset_y
+	 *   Coordinate offsets.
+	 * @return {[type]}          [description]
+	 */
 	Track.prototype.renderSegment = function renderSegment(id, offset_x, offset_y) {
 
     // Marker for start of track segment.
     var message = new PIXI.Text(id, {fontFamily: "Helevetica", fontSize: 256, fill: "gray"});
-
     message.position.set(offset_x, offset_y);
     this.container.addChild(message);
 
@@ -602,16 +632,13 @@ var rtrack = (function() {
 			this.container.addChild(marker);
 		}
 
+
+		var signals = this.getSignals(id);
+
 		// Fetch and render all signals.
-		/**
-
-
-		   @TODO
-
-
-		 */
-
-
+		for (var i in signals) {
+			this.renderSignal(id, i, offset_x, offset_y);
+		}
 
 		// Fetch and render all tracks.
 		/**
@@ -621,6 +648,28 @@ var rtrack = (function() {
 
 		 */
 
+	}
+
+
+	Track.prototype.renderSignal = function renderSignal (sid, signal_id, offset_x, offset_y) {
+		if (typeof this.segments[sid].signals[signal_id] === 'undefined') {
+			return;
+		}
+		// Create new pixi item.
+		else if (typeof this.segments[sid].signals[signal_id].item === 'undefined') {
+			var x = this.segments[sid].signals[signal_id].position + offset_x;
+			var signal = this.renderer.signal(1, x, offset_y);
+			this.segments[sid].signals[signal_id].item = signal;
+			this.container.addChild(signal);
+		}
+		// Just update the texture.
+		else {
+			// Get signal status.
+			var status = this.getSignalStatus(null, sid);
+
+			// Update sprite.
+			this.segments[sid].signals[signal_id].item.texture = this.renderer.signalTexture(status);
+		}
 	}
 
 
