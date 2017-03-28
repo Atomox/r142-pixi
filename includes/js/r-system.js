@@ -28,7 +28,7 @@ var rsystem = (function() {
 
 	  // Style and resize.
 	  this.renderer.view.style.border = "1px dashed black";
-	  this.renderer.backgroundColor = 0xFFFFFF;
+	  this.renderer.backgroundColor = 0x111111;
 	  this.renderer.autoResize = true;
 
 	  // Add the canvas to the HTML document
