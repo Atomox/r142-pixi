@@ -35,25 +35,23 @@ var rtrack = (function() {
 	Track.prototype.setTrackSegments = function setSegments(settings) {
 		if (typeof settings === 'object' && settings !== null) {
 			for (var i = 0; i < settings.length; i++) {
-				this.setTrackSegment(settings[i]);
+				this.setTrackSegment(i, settings[i]);
 			}
 		}
 	}
 
 
-	Track.prototype.setTrackSegment = function setSegment(settings) {
+	Track.prototype.setTrackSegment = function setSegment(id, settings) {
 
 		if (typeof settings !== 'object' || settings === null) {
 			throw new Error('setTrackSegment expects settings object, but', typeof settings, 'found.');
 		}
-		else if (typeof settings.id === 'undefined' || typeof settings.id !== 'number') {
+		else if (typeof id === 'undefined' || typeof id !== 'number') {
 			throw new Error('setTrackSegment expects an ID, but none given.');
 		}
 		else if (typeof settings.length === 'undefined' || typeof settings.length !== 'number' || settings.length <= 0) {
 			throw new Error('setTrackSegment expects a positive length.');
 		}
-
-		var id = settings.id;
 
 		if (typeof this.segments[id] === 'undefined') {
 			this.segments[id] = {};

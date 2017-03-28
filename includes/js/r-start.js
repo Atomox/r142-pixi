@@ -34,13 +34,13 @@ document.addEventListener("DOMContentLoaded",function() {
 		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 4);
 
 		// Add train to 0, at position 0.
-		system.addTrain(0, 22000, trains_east[0]);
+		system.addTrain(0, 15000, trains_east[0]);
 		
 		// Add train to track 0, at position 5000.
-		system.addTrain(0, 30000,trains_east[1]);
+		system.addTrain(0, 22000,trains_east[1]);
 
 		// Add train to track 0, at position 5000.
-		system.addTrain(0, 35000,trains_east[2]);
+		system.addTrain(0, 28000,trains_east[2]);
 
 		/**
 		
@@ -49,8 +49,8 @@ document.addEventListener("DOMContentLoaded",function() {
 		
 
 		 */
-		system.stage.scale.x = .85
-		system.stage.scale.y = .85;
+		system.stage.scale.x = .1
+		system.stage.scale.y = .1;
 
 		gameLoop();
 	});
@@ -72,48 +72,48 @@ function initTracks() {
 	// Init track 0.
 	tracks[0] = new rtrack.Track(0, 'e', 108);
 	tracks[0].setTrackSegments([
-		{id: 0, speed: 5, length: 5000},
-		{id: 1, speed: 10, length: 4000,
+		{speed: 5, length: 2000},
+		{speed: 10, length: 2000,
+			station: {id: 0, track: 0},
+			stop: [
+				[[10,8],256],
+				[[6,4], 1560]
+			]},
+		{speed: 5, length: 500},
+		{speed: 25, length: 2000},
+		{speed: 25, length: 1000},
+		{speed: 10, length: 2000,
 			station: {id: 0, track: 0},
 			stop: [
 				[[10,8],1560],
 				[[6,4], 256]
 			]},
-		{id: 2, speed: 5, length: 500},
-		{id: 3, speed: 25, length: 3000},
-		{id: 4, speed: 25, length: 1000},
-		{id: 5, speed: 10, length: 4000,
-			station: {id: 0, track: 0},
-			stop: [
-				[[10,8],1560],
-				[[6,4], 256]
-			]},
-		{id: 6, speed: 25, length: 1000},
-		{id: 7, speed: 25, length: 5000},
-		{id: 8, speed: 25, length: 1000},
-		{id: 9, speed: 10, length: 4000,
+		{speed: 25, length: 1000},
+		{speed: 25, length: 2000},
+		{speed: 25, length: 1000},
+		{speed: 10, length: 3000,
 			station: {id: 1, track: 0},
 			stop: [
 				[[10,8],1560],
 				[[6,4], 256]
 			]},
-		{id: 10, speed: 25, length: 1000},
-		{id: 11, speed: 25, length: 3000},
-		{id: 12, speed: 25, length: 5000},
-		{id: 13, speed: 25, length: 5000},
-		{id: 14, speed: 25, length: 1000},
-		{id: 15, speed: 25, length: 5000},
-		{id: 16, speed: 25, length: 1000},
-		{id: 17, speed: 10, length: 4000,
+		{speed: 25, length: 1000},
+		{speed: 25, length: 2000},
+		{speed: 25, length: 2000},
+		{speed: 25, length: 2000},
+		{speed: 25, length: 1000},
+		{speed: 25, length: 2000},
+		{speed: 25, length: 1000},
+		{speed: 10, length: 3000,
 			station: {id: 1, track: 0},
 			stop: [
 				[[10,8],1560],
 				[[6,4], 1560]
 			]},
-		{id: 18, speed: 25, length: 1000},
-		{id: 19, speed: 10, length: 4000},
-		{id: 20, speed: 5, length: 500},
-		{id: 21, speed: 5, length: 500},
+		{speed: 25, length: 1000},
+		{speed: 10, length: 2000},
+		{speed: 5, length: 500},
+		{speed: 5, length: 500},
 	]);
 }
 
