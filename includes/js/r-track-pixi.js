@@ -12,8 +12,8 @@ var rtrackpixi = (function() {
 		my_stop.position.x = x;
 		my_stop.position.y = y;
 
-//		my_stop.scale.y = .35;
-//		my_stop.scale.x = .35;
+		my_stop.scale.y = .35;
+		my_stop.scale.x = .35;
 
 		return my_stop;
 	}
@@ -31,7 +31,9 @@ var rtrackpixi = (function() {
 		var my_texture = getSignalTexture(status)
   	var my_signal = new PIXI.Sprite(my_texture);
 		my_signal.position.x = x;
-		my_signal.position.y = y;
+		my_signal.position.y = y + my_signal.height / 5;
+		my_signal.scale.x = .75;
+		my_signal.scale.y = .75;
 
 		console.log('Adding new signal ...', status, 'signal pos:', x, y);
 

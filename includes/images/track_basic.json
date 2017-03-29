@@ -2,29 +2,29 @@
 
 "signal_g.png":
 {
-	"frame": {"x":0,"y":0,"w":18,"h":150},
+	"frame": {"x":0,"y":0,"w":75,"h":150},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":150},
-	"sourceSize": {"w":18,"h":150},
+	"spriteSourceSize": {"x":0,"y":0,"w":75,"h":150},
+	"sourceSize": {"w":75,"h":150},
 	"pivot": {"x":0.5,"y":0.5}
 },
 "signal_r.png":
 {
-	"frame": {"x":0,"y":150,"w":18,"h":150},
+	"frame": {"x":0,"y":150,"w":75,"h":150},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":150},
-	"sourceSize": {"w":18,"h":150},
+	"spriteSourceSize": {"x":0,"y":0,"w":75,"h":150},
+	"sourceSize": {"w":75,"h":150},
 	"pivot": {"x":0.5,"y":0.5}
 },
 "signal_y.png":
 {
-	"frame": {"x":0,"y":300,"w":18,"h":150},
+	"frame": {"x":0,"y":300,"w":75,"h":150},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":150},
-	"sourceSize": {"w":18,"h":150},
+	"spriteSourceSize": {"x":0,"y":0,"w":75,"h":150},
+	"sourceSize": {"w":75,"h":150},
 	"pivot": {"x":0.5,"y":0.5}
 }},
 "meta": {
@@ -32,8 +32,8 @@
 	"version": "1.0",
 	"image": "track_basic.png",
 	"format": "RGBA8888",
-	"size": {"w":18,"h":450},
+	"size": {"w":75,"h":450},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:fbc12d61ae9ce91bddc8363f47fdb469:95879fde00aad05454b572224d37e197:913a62e1379593c017998e57c33228c9$"
+	"smartupdate": "$TexturePacker:SmartUpdate:0e404854566e65fa15b92c7ba1d1e012:e097dbadac51cf83243567a3adc3a10f:913a62e1379593c017998e57c33228c9$"
 }
 }

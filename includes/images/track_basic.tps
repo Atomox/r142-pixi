@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.3.3</string>
         <key>fileName</key>
-        <string>/Users/helmebe/Sites/node.js/pixi/includes/images/track_basic.tps</string>
+        <string>/Users/Atomox/Sites/r-pixi/includes/images/track_basic.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -198,7 +198,6 @@
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
             <key type="filename">signal_g.png</key>
-            <key type="filename">signal_r.png</key>
             <key type="filename">signal_y.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -206,9 +205,22 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>5,38,9,75</rect>
+                <rect>19,38,38,75</rect>
                 <key>scale9Paddings</key>
-                <rect>5,38,9,75</rect>
+                <rect>19,38,38,75</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">signal_r.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>0,0,0,0</rect>
+                <key>scale9Paddings</key>
+                <rect>0,0,0,0</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

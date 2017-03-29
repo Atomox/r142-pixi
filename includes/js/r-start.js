@@ -32,9 +32,9 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.assembleFrame(37000,0, screen.width, screen.height);
 
 		// Init train 0.
-		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 6);
-		trains_east[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 6);
-		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 6);
+		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
+		trains_east[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 8);
+		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 8);
 
 		// Add trains to track 0, at various positions.
 		system.addTrain(0, 35000, trains_east[0]);
@@ -71,21 +71,31 @@ function initTracks() {
 	tracks[0].setTrackSegments([
 		{speed: 5, length: min_length},
 		{speed: 5, length: min_length},
-		{speed: 10, length: min_station_length,
+		{speed: 10, length: min_station_length/3,
 			station: {id: 0, track: 0},
-			stop: [
-				[[10,8],64],
-				[[6,4], 1560]
-			]},
+		},
+		{speed: 10, length: min_station_length/3,
+			station: {id: 0, track: 0},
+			stop: [[[10,8],64]]
+		},
+		{speed: 10, length: min_station_length/3,
+			station: {id: 0, track: 0},
+			stop: [[[6,4], 64]]
+		},
 		{speed: 5, length: min_length},
 		{speed: 25, length: min_length},
 		{speed: 25, length: min_length},
-		{speed: 10, length: min_station_length,
+		{speed: 10, length: min_station_length/3,
 			station: {id: 0, track: 0},
-			stop: [
-				[[10,8],256],
-				[[6,4], 1560]
-			]},
+		},
+		{speed: 10, length: min_station_length/3,
+			station: {id: 0, track: 0},
+			stop: [[[10,8],64]]
+		},
+		{speed: 10, length: min_station_length/3,
+			station: {id: 0, track: 0},
+			stop: [[[6,4], 64]]
+		},
 		{speed: 25, length: min_length},
 		{speed: 25, length: min_length},
 		{speed: 25, length: min_length},

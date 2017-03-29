@@ -71,10 +71,9 @@ var rtrack = (function() {
 		this.segments[id].occupied = false;
 		this.segments[id].signals = {};
 
-		// Set a signal every 500 feet.
-		for (var i = 0; i < settings.length; i += 750) {
-			this.addSignal(id, i);
-		}
+		// Set a signal at the entry to every segment.
+		var signal_pos = (['n','e'].indexOf(settings.direction) >= 0) ? settings.length - 5 : 5;
+		this.addSignal(id, signal_pos);
 	}
 
 
@@ -621,7 +620,7 @@ var rtrack = (function() {
 	Track.prototype.renderSegment = function renderSegment(id, offset_x, offset_y) {
 
     // Marker for start of track segment.
-    var message = new PIXI.Text(id, {fontFamily: "Helevetica", fontSize: 256, fill: "gray"});
+    var message = new PIXI.Text(id, {fontFamily: "Helevetica", fontSize: 32, fill: "gray"});
     message.position.set(offset_x, offset_y);
     this.container.addChild(message);
 
