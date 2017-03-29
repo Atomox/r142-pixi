@@ -656,7 +656,9 @@ var rtrack = (function() {
 		}
 		// Create new pixi item.
 		else if (typeof this.segments[sid].signals[signal_id].item === 'undefined') {
+
 			var x = this.segments[sid].signals[signal_id].position + offset_x;
+			x = (this.direction == 'e') ? x + 25 : x - 25;
 			var signal = this.renderer.signal(1, x, offset_y);
 			this.segments[sid].signals[signal_id].item = signal;
 			this.container.addChild(signal);
@@ -667,7 +669,7 @@ var rtrack = (function() {
 			var status = this.getSignalStatus(null, sid);
 
 			// Update sprite.
-			this.segments[sid].signals[signal_id].item.texture = this.renderer.signalTexture(status);
+			this.segments[sid].signals[signal_id].item.texture = this.renderer.signalTexture(status, this.direction);
 		}
 	}
 

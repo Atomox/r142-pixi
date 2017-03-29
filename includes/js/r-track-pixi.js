@@ -18,17 +18,18 @@ var rtrackpixi = (function() {
 		return my_stop;
 	}
 
-	function getSignalTexture(status) {
+	function getSignalTexture(status, direction) {
 		if (typeof textures === 'undefined') {
 //			textures = PIXI.loader.resources["/images/track_basic.json"].textures;
 		}
 		var type = (status === -1) ? 'r' : (status === 0) ? 'y' : 'g';
-		return PIXI.utils.TextureCache["signal_" + type + ".png"];
+		var direction = (direction === 'e') ? 'e' : 'w';
+		return PIXI.utils.TextureCache["signal_" + type + '_' + direction + ".png"];
 //		return textures["signal_" + type + ".png"];
 	}
 
-	function renderSignal(status, x, y) {
-		var my_texture = getSignalTexture(status)
+	function renderSignal(status, x, y, direction) {
+		var my_texture = getSignalTexture(status, direction);
   	var my_signal = new PIXI.Sprite(my_texture);
 		my_signal.position.x = x;
 		my_signal.position.y = y + my_signal.height / 5;
