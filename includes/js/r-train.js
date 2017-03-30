@@ -24,7 +24,7 @@ var rtrain = (function rTrainFactory() {
   }
 
 
-  Train.prototype.getPosition = function() {
+  Train.prototype.getPosition = function getPosition() {
     return this.container.x;
   }
 
@@ -247,14 +247,14 @@ var rtrain = (function rTrainFactory() {
       // When we meet or surpass our limit, end this status.
       if (this.container.vx === this.action.final) {
         this.container.vx = this.action.final;
-        console.log('Reached final', this.status, 'of',this.action.final,'.');
+        console.log(this.id, ':', 'Reached final', this.status, 'of',this.action.final,'.');
 
         if (this.action.final === 0) {
-          console.log('Setting to idle.');
+          console.log(this.id, ':', 'Setting to idle.');
           this.status = 'idle';
         }
         else {
-          console.log(this.action.final, 'reached. Setting to maintain.');
+          console.log(this.id, ':', this.action.final, 'reached. Setting to maintain.');
           this.maintain(this.action.final);
         }
       }
@@ -296,7 +296,7 @@ var rtrain = (function rTrainFactory() {
       this.container.x = 0;
     }
     else if (this.container.x > this.container.length) {
-      this.container.x = this.container.lengthl
+      this.container.x = this.container.length;
     }
 
     return (this.status === 'idle') ? false : true;
@@ -348,6 +348,7 @@ var rtrain = (function rTrainFactory() {
     // If no destination, get one.
     if (typeof this.destination === 'undefined' || this.destination === null) {
       this.destination = track.getTrainDestination(this.id, this.car_count, this.container.x);
+      console.log(this.id, ': New Destination: ', this.destination);
     }
 
 
@@ -357,7 +358,7 @@ var rtrain = (function rTrainFactory() {
     var destination = (signal_status !== false) ? signal_status : this.destination;
 
     if (signal_status !== false) {
-      console.log(this.id, 'RED SIGNAL in segment: ', signal_status.segment);
+//      console.log(this.id, 'RED SIGNAL in segment: ', signal_status.segment);
     }
 
 
@@ -434,7 +435,7 @@ var rtrain = (function rTrainFactory() {
     }
     else {
       if (this.status == 'idle' && destination.type == "stop_marker") {
-        console.log('Stop Marker...');
+        console.log(this.id, ': Stop Marker...');
       }
     }
 

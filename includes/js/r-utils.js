@@ -67,8 +67,8 @@ var rutils = (function() {
 
 	function passedDestination(dest_x, x, direction) {
 		if (
-			(['n', 'e'].indexOf(direction) >= 0 && dest_x > x)
-			|| (['s', 'w'].indexOf(direction) >= 0 && dest_x < x)
+			(['n', 'e'].indexOf(direction) >= 0 && dest_x >= x)
+			|| (['s', 'w'].indexOf(direction) >= 0 && dest_x <= x)
 			) {
 			return true;
 		}

@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded",function() {
 
 
 		// Assemble the system.
-		system.assembleFrame(tracks[0].getDistanceToSegment(13),0, screen.width, screen.height);
+		system.assembleFrame(tracks[0].getDistanceToSegment(14),0, screen.width, screen.height);
 
 		// Init train 0.
 		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
@@ -63,10 +63,9 @@ document.addEventListener("DOMContentLoaded",function() {
 
 		// Add trains to track 0, at various positions.
 		system.addTrain(0, 35000,trains_east[0]);
-		system.addTrain(0, 50000,trains_east[1]);
-		system.addTrain(0, 65000,trains_east[2]);
-
-
+		system.addTrain(0, tracks[0].getDistanceToSegment(16),trains_east[1]);
+//		system.addTrain(0, tracks[0].getDistanceToSegment(20),trains_east[2]);
+/**
 		trains_west[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
 		trains_west[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 8);
 		trains_west[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 8);
@@ -75,7 +74,7 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.addTrain(1, 35000,trains_west[0]);
 		system.addTrain(1, 50000,trains_west[1]);
 		system.addTrain(1, 65000,trains_west[2]);
-
+*/
 
 
 		// Scale, when necessary.
@@ -113,11 +112,15 @@ function initTracks(id, direction) {
 		},
 		{speed: 10, length: min_station_third,
 			station: {id: 0, track: 0},
-			stop: [[[10,8],64]]
+			stop: [
+				[[10,8],64]
+			]
 		},
 		{speed: 10, length: min_station_third,
 			station: {id: 0, track: 0},
-			stop: [[[6,4], 64]]
+			stop: [
+				[[6,4], 64]
+			]
 		},
 		{speed: 5, length: min_length},
 		{speed: 25, length: min_length},

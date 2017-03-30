@@ -196,6 +196,8 @@ var rtrack = (function() {
 				x: x
 			});
 		}
+
+		console.log('STOP MARKERS FINAL:', this.segments[id].stopmarker);
 	}
 
 
@@ -626,15 +628,16 @@ var rtrack = (function() {
 
 		// Fetch and render all stop markers.
 		var markers = this.getStopMarker(id);
+		console.log(id,': ', markers.length, ' STOP MARKERS TO RENDER.', this.segments[id]);
 		for (var i = 0; i < markers.length; i++) {
+			console.log(this.id, ':', id, 'Stop marker at:', markers[i].x + offset_x, offset_y);
 			var marker = this.renderer.stopMarker(markers[i].cars, markers[i].x + offset_x, offset_y);
 			this.container.addChild(marker);
 		}
 
 
-		var signals = this.getSignals(id);
-
 		// Fetch and render all signals.
+		var signals = this.getSignals(id);
 		for (var i in signals) {
 			this.renderSignal(id, i, offset_x, offset_y);
 		}
