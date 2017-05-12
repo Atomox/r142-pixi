@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded",function() {
 
 
 		// Assemble the system.
-		system.assembleFrame(tracks[0].getDistanceToSegment(14),0, screen.width, screen.height);
+		system.assembleFrame(tracks[0].getDistanceToSegment(0),0, screen.width, screen.height);
 
 		// Init train 0.
 		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
@@ -62,9 +62,9 @@ document.addEventListener("DOMContentLoaded",function() {
 		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 8);
 
 		// Add trains to track 0, at various positions.
-		system.addTrain(0, 35000,trains_east[0]);
-		system.addTrain(0, tracks[0].getDistanceToSegment(16),trains_east[1]);
-//		system.addTrain(0, tracks[0].getDistanceToSegment(20),trains_east[2]);
+		system.addTrain(0, tracks[0].getDistanceToSegment(7),trains_east[0]);
+		system.addTrain(0, tracks[0].getDistanceToSegment(9),trains_east[1]);
+		system.addTrain(0, tracks[0].getDistanceToSegment(11),trains_east[2]);
 /**
 		trains_west[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
 		trains_west[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 8);
@@ -79,8 +79,8 @@ document.addEventListener("DOMContentLoaded",function() {
 
 		// Scale, when necessary.
 		// Mostly used for zooming out when debugging.
-		system.stage.scale.x = 1;
-		system.stage.scale.y = 1;
+		system.stage.scale.x = .05;
+		system.stage.scale.y = .05;
 
 		gameLoop();
 	});

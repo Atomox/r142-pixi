@@ -219,7 +219,7 @@ var rtrack = (function() {
 	 */
 	Track.prototype.getTrainDestination = function getTrainDestination(train_id, num_cars, x, get_next) {
 
-		if (get_next === true) { console.log('get Next');}
+		if (get_next === true) { console.log('get Next'); }
 
 		// If we're inside the track bounds, check segments.
 		if (this.inTrackBounds(x)) {
@@ -244,8 +244,8 @@ var rtrack = (function() {
 
 						// Return any markers we have not already passed.
 						if (get_next === true) {
-							if ((['n', 'e'].indexOf(this.direction) >= 0 && my_distance <= x)
-								|| (['s', 'w'].indexOf(this.direction) >= 0 && my_distance >= x)) {
+							if ((['n', 'e'].indexOf(this.direction) >= 0 && my_distance < x)
+								|| (['s', 'w'].indexOf(this.direction) >= 0 && my_distance > x)) {
 								return {
 									x: my_distance,
 									type: 'stop_marker'

@@ -27,7 +27,7 @@ var rsystem = (function() {
 	  );
 
 	  // Style and resize.
-	  this.renderer.view.style.border = "1px dashed black";
+	  this.renderer.view.style.border = "1px dashed gray";
 	  this.renderer.backgroundColor = 0xFFFFFF;
 	  this.renderer.autoResize = true;
 
