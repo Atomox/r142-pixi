@@ -373,10 +373,17 @@ var rtrack = (function() {
 	 */
 	Track.prototype.getSpeedLimit = function speedLimit(sid, x, train_id) {
 
-		if (sid || this.inTrackBounds(x)) {
+		var x1 = (this.direction == 'e') ? x : x-1,
+				x2 = (this.direction == 'e') ? x+1 : x;
+
+		if (sid || (this.inTrackBounds(x1) && this.inTrackBounds(x2))) {
 			if (typeof sid !== 'number' || sid < 0) {
-				var my_seg = this.getSegmentsByBounds(x, x+1);
+
+				var my_seg = this.getSegmentsByBounds(x1, x2);
 				if (typeof my_seg[0] !== 'undefined') { sid = my_seg[0].id; }
+				else {
+					console.log('Can\'t get segment ID!!! Track length: ', this.getLength());
+				}
 			}
 
 			if (typeof this.segments[sid] !== 'undefined') {

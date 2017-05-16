@@ -379,7 +379,7 @@ var rtrain = (function rTrainFactory() {
     // 4. Get speed, distance to destination, and stopping distance.
 
     // Get speed of current segment.
-    var speed = track.getSpeedLimit(null, this.container.x, this.id);
+    var speed = track.getSpeedLimit(null, front_of_train_x, this.id);
 
     // How far away are we?
     var distance_remaining = (this.direction == 'e')
