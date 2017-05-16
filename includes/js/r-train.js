@@ -352,7 +352,7 @@ var rtrain = (function rTrainFactory() {
     }
 
 
-    // 3. Does signal traffic overrtide our destination?
+    // 3. Does signal traffic override our destination?
     // Is there a red signal? If so, stop, but don't change destination.
     var signal_status = track.getSignalDestination(this.id, this.car_count, this.container.x);
     var destination = (signal_status !== false) ? signal_status : this.destination;

@@ -1,10 +1,15 @@
 'use strict';
 
 var rsystem = (function() {
-	function System(width, height) {
+	function System(width, height, debug) {
 		this.tracks = [];
 		this.stations = [];
 		this.trains = [];
+		this.debug = false;
+
+		if (typeof debug !== 'undefined' && debug === true) {
+			this.debug = true;
+		}
 
 		// Create a container object called the `stage`, and a renderer.
 		this.stage = new PIXI.Container();
@@ -76,7 +81,7 @@ var rsystem = (function() {
 
 		for (var i = 0; i < this.tracks.length; i++) {
 			if (typeof this.tracks[i].track !== 'undefined') {
-				this.tracks[i].track.state();
+				this.tracks[i].track.state(this.debug);
 			}
 		}
 
@@ -121,7 +126,7 @@ var rsystem = (function() {
 	 * @param  {int} x1,x2,y1,y2
 	 *   The viewport coordinates.
 	 */
-	System.prototype.renderTracks = function(x1, x2, y1, y2, offset_x, offset_y) {
+	System.prototype.renderTracks = function(x1, x2, y1, y2) {
 
 		// Find all tracks that overlap our viewport.
 		var my_tracks = this.findTracks(x1, x2, y1, y2);

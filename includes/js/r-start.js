@@ -4,9 +4,9 @@ var system = null,
 	stations = [],
 	tracks = [],
   screen = {
-  	width: 8092,
+  	width: 20000, // 8092,
   	height: 384,
-  	scale: 0.5,
+  	scale: .3,
   	segment_left: 1,
   };
 
@@ -14,7 +14,7 @@ var system = null,
 document.addEventListener("DOMContentLoaded",function() {
 
 	// Create a train system, and init Pixi.
-	system = new rsystem.System(screen.width, screen.height);
+	system = new rsystem.System(screen.width, screen.height, true);
 
 	loadTexture(null, "images/station_basic.json")
 	.then(function(url) {
@@ -29,12 +29,8 @@ document.addEventListener("DOMContentLoaded",function() {
 
 		 @TODO
 
-
-
-
-
 		 */
-		var direction = ['e','w'];
+		var direction = ['e', 'w']; // ['e','w'];
 		// Create some tracks.
 		for (var i = 0; i < 2; i++) {
 			var my_y = (i === 0) ? 64 : 256;
@@ -69,15 +65,15 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.assembleFrame(tracks[0].getDistanceToSegment(screen.segment_left),0, screen.width, screen.height);
 
 		// Init train 0.
-		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
-		trains_east[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 8);
-		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 8);
+		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 4);
+		trains_east[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 4);
+//		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 4);
 
 		// Add trains to track 0, at various positions.
 
-		system.addTrain(0, tracks[0].getDistanceToSegment(7),trains_east[0]);
-		system.addTrain(0, tracks[0].getDistanceToSegment(9),trains_east[1]);
-		system.addTrain(0, tracks[0].getDistanceToSegment(11),trains_east[2]);
+		system.addTrain(0, tracks[0].getDistanceToSegment(10),trains_east[0]);
+		system.addTrain(0, tracks[0].getDistanceToSegment(13),trains_east[1]);
+//		system.addTrain(0, tracks[0].getDistanceToSegment(6),trains_east[2]);
 
 /**
 		trains_west[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
@@ -102,7 +98,19 @@ document.addEventListener("DOMContentLoaded",function() {
 
 
 function gameLoop() {
+
+
+		/**
+		   
+
+
+		   @TODO
+
+
+
+		 */
   requestAnimationFrame(gameLoop);
+//  requestAnimationFrame(function(){});
 
   if (!system.state()) {
     return false;
@@ -113,8 +121,8 @@ function gameLoop() {
 
 
 function initTracks(id, direction) {
-	var min_length = 2000,
-		min_station_length = 8000,
+	var min_length = 1000,
+		min_station_length = 3000,
 		min_station_third = Math.floor(min_station_length/3);
 	// Init track 0.
 	tracks[id] = new rtrack.Track(id, direction, 108);
@@ -127,13 +135,13 @@ function initTracks(id, direction) {
 		{speed: 10, length: min_station_third,
 			station: {id: 0, track: 0},
 			stop: [
-				[[10,8],64]
+				[[10,8],6,4]
 			]
 		},
 		{speed: 10, length: min_station_third,
 			station: {id: 0, track: 0},
 			stop: [
-				[[6,4], 64]
+				[[6,4], 6,4]
 			]
 		},
 		{speed: 5, length: min_length},
@@ -144,11 +152,11 @@ function initTracks(id, direction) {
 		},
 		{speed: 10, length: min_station_third,
 			station: {id: 0, track: 0},
-			stop: [[[10,8],64]]
+			stop: [[[10,8],6,4]]
 		},
 		{speed: 10, length: min_station_third,
 			station: {id: 0, track: 0},
-			stop: [[[6,4], 64]]
+			stop: [[[6,4], 6,4]]
 		},
 		{speed: 25, length: min_length},
 		{speed: 25, length: min_length},
@@ -158,11 +166,11 @@ function initTracks(id, direction) {
 		},
 		{speed: 10, length: min_station_third,
 			station: {id: 0, track: 0},
-			stop: [[[10,8],64]]
+			stop: [[[10,8],6,4]]
 		},
 		{speed: 10, length: min_station_third,
 			station: {id: 0, track: 0},
-			stop: [[[6,4], 64]]
+			stop: [[[6,4], 6,4]]
 		},
 		{speed: 25, length: min_length},
 		{speed: 25, length: min_length},

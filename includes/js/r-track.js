@@ -480,7 +480,7 @@ var rtrack = (function() {
 	}
 	Track.prototype.getTrackDirection = function direction() {	return this.direction; }
 
-	Track.prototype.state = function state() {
+	Track.prototype.state = function state(debug) {
 
 		if (typeof this.state_counter === 'undefined') { this.state_counter = 0; }
 
@@ -502,6 +502,11 @@ var rtrack = (function() {
 			// Update platforms.
 
 
+			// Update debug UI.
+			if (debug === true) {
+				this.debugUI();
+			}
+
 			// Reset count to zero.
 			this.state_counter = 0;
 		}
@@ -521,6 +526,11 @@ var rtrack = (function() {
 //		while ((new Date()) - dt <= 5000) { /* Do nothing */ }
 
 		return true;
+	}
+
+
+	Track.prototype.debugUI = function debugUI() {
+		debugSystemUI(this);
 	}
 
 
@@ -677,7 +687,7 @@ var rtrack = (function() {
 
 			var x = this.segments[sid].signals[signal_id].position + offset_x;
 			x = (this.direction == 'e') ? x + 25 : x - 25;
-			var signal = this.renderer.signal(1, x, offset_y);
+			var signal = this.renderer.signal(1, x, offset_y, this.direction);
 			this.segments[sid].signals[signal_id].item = signal;
 			this.container.addChild(signal);
 		}
