@@ -581,13 +581,28 @@ var rtrack = (function() {
 		// Make sure we've initialized our renderer.
 		if (typeof this.container === 'undefined') { this.initRenderer(); }
 
-		console.log('Rendering tracks from: ', x1, x2);
+		// We need the offset of this track from the start of the viewport, 
+		// so our items render past the 0-> width of viewport, when the viewport
+		// is not at x = 0.
+		var my_segment = this.getSegmentsByBounds(x1,x1+1),
+				x_offset = 0;
+
+		// Make sure we could find our first visable segment. If found, the distance
+		// to that segment is the offset of x to the start of the viewport.
+		if (typeof my_segment === 'object' && typeof my_segment[0] === 'object') {
+			if (typeof my_segment.distance === 'undefined') {
+				x_offset = my_segment[0].distance;
+			}
+		}
+		x1 = x1 + x_offset;
+		x2 = x2 + x_offset;
 
 		// Horizontal ruler.
-		for (var a = x1; a < x2; a += 100) {
-	    var message = new PIXI.Text(a, {fontFamily: "Helvetica", fontSize: 12, fill: "gray"});
+		for (var a = x1; a < x2; a += 500) {
+	    var message = new PIXI.Text(a, {fontFamily: "Helvetica", fontSize: 50, fill: "gray"});
 	    message.position.set(a, this.height - message.height);
 			this.container.addChild(message);
+			console.log("Rendering ruler at: ", a, this.height - message.height);
 		}
 
 		// Vertical rules.

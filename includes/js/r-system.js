@@ -27,7 +27,7 @@ var rsystem = (function() {
 	  );
 
 	  // Style and resize.
-	  this.renderer.view.style.border = "1px dashed gray";
+	  this.renderer.view.style.border = "1px dashed #bbb";
 	  this.renderer.backgroundColor = 0xFFFFFF;
 	  this.renderer.autoResize = true;
 
@@ -121,7 +121,7 @@ var rsystem = (function() {
 	 * @param  {int} x1,x2,y1,y2
 	 *   The viewport coordinates.
 	 */
-	System.prototype.renderTracks = function(x1, x2, y1, y2) {
+	System.prototype.renderTracks = function(x1, x2, y1, y2, offset_x, offset_y) {
 
 		// Find all tracks that overlap our viewport.
 		var my_tracks = this.findTracks(x1, x2, y1, y2);

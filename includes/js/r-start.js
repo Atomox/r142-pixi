@@ -5,7 +5,9 @@ var system = null,
 	tracks = [],
   screen = {
   	width: 8092,
-  	height: 384
+  	height: 384,
+  	scale: 0.5,
+  	segment_left: 1,
   };
 
 
@@ -22,6 +24,16 @@ document.addEventListener("DOMContentLoaded",function() {
 		return Promise.all([urls[0], urls[1], loadTexture(null, "images/track_basic.json")]);
 	})
 	.then(function allThen(urls) {
+		/**
+		 
+
+		 @TODO
+
+
+
+
+
+		 */
 		var direction = ['e','w'];
 		// Create some tracks.
 		for (var i = 0; i < 2; i++) {
@@ -54,7 +66,7 @@ document.addEventListener("DOMContentLoaded",function() {
 
 
 		// Assemble the system.
-		system.assembleFrame(tracks[0].getDistanceToSegment(0),0, screen.width, screen.height);
+		system.assembleFrame(tracks[0].getDistanceToSegment(screen.segment_left),0, screen.width, screen.height);
 
 		// Init train 0.
 		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
@@ -62,9 +74,11 @@ document.addEventListener("DOMContentLoaded",function() {
 		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 8);
 
 		// Add trains to track 0, at various positions.
+
 		system.addTrain(0, tracks[0].getDistanceToSegment(7),trains_east[0]);
 		system.addTrain(0, tracks[0].getDistanceToSegment(9),trains_east[1]);
 		system.addTrain(0, tracks[0].getDistanceToSegment(11),trains_east[2]);
+
 /**
 		trains_west[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
 		trains_west[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 8);
@@ -79,8 +93,8 @@ document.addEventListener("DOMContentLoaded",function() {
 
 		// Scale, when necessary.
 		// Mostly used for zooming out when debugging.
-		system.stage.scale.x = .05;
-		system.stage.scale.y = .05;
+		system.stage.scale.x = screen.scale;
+		system.stage.scale.y = screen.scale;
 
 		gameLoop();
 	});
@@ -99,7 +113,7 @@ function gameLoop() {
 
 
 function initTracks(id, direction) {
-	var min_length = 6000,
+	var min_length = 2000,
 		min_station_length = 8000,
 		min_station_third = Math.floor(min_station_length/3);
 	// Init track 0.
