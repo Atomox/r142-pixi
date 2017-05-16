@@ -317,16 +317,21 @@ var rtrain = (function rTrainFactory() {
       return this.continue();
     }
 
+    var front_of_train_x = this.container.x;
+    if (this.direction === 'w') {
+      front_of_train_x += this.getLength();
+    }
+
     // 2. Check destination.
     // Did we reach or pass our destination?
     if (typeof this.destination !== 'undefined'
-      && rutils.passedDestination(this.destination.x,this.container.x,this.direction)) {
+      && rutils.passedDestination(this.destination.x,front_of_train_x,this.direction)) {
 
       // If arrival procedure complete, find next destination.
       if (this.status == 'departure') {
         // Get next destination.
-        this.destination = track.getTrainDestination(this.id, this.car_count, this.container.x, true);
-        console.log('DEPARTURE:', this.destination, this.container.x);
+        this.destination = track.getTrainDestination(this.id, this.car_count, front_of_train_x, true);
+        console.log('DEPARTURE:', this.destination, front_of_train_x);
       }
       // If arrival, begin unboarding procedure.
       else if (this.destination.type == 'stop_marker') {
@@ -340,25 +345,34 @@ var rtrain = (function rTrainFactory() {
       }
       // In all other cases, get the next destination.
       else {
-        console.warn('Past destination, but did not match scenarios.');
+        if (this.destination.type !== 'signal') {
+          console.warn('Past destination, but did not match scenarios.');
+        }
         this.destination = null;
       }
     }
 
-    // If no destination, get one.
-    if (typeof this.destination === 'undefined' || this.destination === null) {
-      this.destination = track.getTrainDestination(this.id, this.car_count, this.container.x);
-      console.log(this.id, ': New Destination: ', this.destination);
-    }
-
-
     // 3. Does signal traffic override our destination?
     // Is there a red signal? If so, stop, but don't change destination.
-    var signal_status = track.getSignalDestination(this.id, this.car_count, this.container.x);
-    var destination = (signal_status !== false) ? signal_status : this.destination;
+    var signal_status = track.getSignalDestination(this.id, this.car_count, front_of_train_x);
+    var destination = this.destination;
 
-    if (signal_status !== false) {
-//      console.log(this.id, 'RED SIGNAL in segment: ', signal_status.segment);
+    if (signal_status !== false && this.status !== 'signal') {
+      this.status = 'signal';
+      this.destination = signal_status;
+      destination = signal_status;
+     // console.log(this.id, 'RED SIGNAL in segment: ', signal_status.segment);
+    }
+    else if (signal_status === false && this.status === 'signal') {
+      this.status = null;
+      this.destination = null;
+    }
+
+    // If no destination, get one.
+    if (typeof this.destination === 'undefined' || this.destination === null) {
+      this.destination = track.getTrainDestination(this.id, this.car_count, front_of_train_x);
+      destination = this.destination;
+//      console.log(this.id, ': New Destination: ', this.destination);
     }
 
 
@@ -369,8 +383,8 @@ var rtrain = (function rTrainFactory() {
 
     // How far away are we?
     var distance_remaining = (this.direction == 'e')
-      ? this.container.x - destination.x
-      : destination.x - this.container.x;
+      ? front_of_train_x - destination.x
+      : destination.x - front_of_train_x;
 
     // At the current speed, what distance will it take to stop at our destination?
     var my_stop_distance = rutils.calculateStoppingDistance(this.container.vx, this.decel_step.normal);
@@ -400,13 +414,8 @@ var rtrain = (function rTrainFactory() {
     // If arrival. // && this.container.x <= destination.distance
     else if (my_stop_distance <= 0 && distance_remaining <= 0
       && ['stop_marker', 'eol'].indexOf(destination.type) < 0) {
-      if (this.status !== 'waiting') {
-        console.log(this.id, '(', this.status, '): Waiting... for ', destination.type);
-        console.log(this.id, "Waiting for ...", destination.type,
-          ' -- My stop dist:', my_stop_distance,
-          ', My destination dist:', destination.x,
-          ', My distance remaining:', distance_remaining,
-          ' My pos:', this.container.x);
+      if (!['signal', 'waiting'].indexOf(this.status)) {
+//        console.log(this.id, '(', this.status, '): Waiting... for ', destination.type);
       }
       this.waiting();
     }
@@ -428,14 +437,13 @@ var rtrain = (function rTrainFactory() {
         this.decel(speed, this.decel_step.normal);
       }
       else {
-        if (this.status !== 'maintain') { console.log(this.id, ': Maintain...', speed, destination); }
         // Continue unchanged.
         this.maintain(speed);
       }
     }
     else {
       if (this.status == 'idle' && destination.type == "stop_marker") {
-        console.log(this.id, ': Stop Marker...');
+//        console.log(this.id, ': Stop Marker...');
       }
     }
 

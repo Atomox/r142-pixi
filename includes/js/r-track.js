@@ -99,10 +99,18 @@ var rtrack = (function() {
 		// Render the train container, and add it.
 		var my_train_container = train.render(position);
 
-		console.log(' > Request to add train', train.id, 'to track', this.id, 'at range:', position, position + train.getLength());
-
 		// Get all segments this train would occupy.
-		var my_segments = this.getSegmentsByBounds(position, position + train.getLength());
+		var train_x1 = position,
+			train_x2 = position  + train.getLength();
+
+		console.log(' > Request to add train', train.id, 'to track', this.id, 'at range:', train_x1, train_x2);
+
+		if (!this.inTrackBounds(train_x1) || !this.inTrackBounds(train_x2)) {
+			console.warn('Cannot add train outside of track bounds.');
+			return false;
+		}
+
+		var my_segments = this.getSegmentsByBounds(train_x1, train_x2);
 
 		console.log('   -> Segments train would occupy:', my_segments);
 
@@ -225,27 +233,27 @@ var rtrack = (function() {
 		if (this.inTrackBounds(x)) {
 
 			// Get train front location.
-			var my_segments = this.getSegmentsByBounds(x, x+1);
+			var my_segments = (this.direction == 'e')
+				? this.getSegmentsByBounds(x, x+1)
+				: this.getSegmentsByBounds(x-1, x);
+
 			if (typeof my_segments !== 'object' || my_segments === null || my_segments.length <= 0) {
 				throw new Error('Train Destination cannot calculate due to missing segments.');
 			}
 
-			// Otherwise, check for track stop marker.
-			for (var i = my_segments[0].id; i >= 0; i--) {
-				if (typeof this.segments[i] === 'undefined'
-					|| typeof this.segments[i].stopmarker === 'undefined') {
-					continue;
-				}
+			var my_for_condition = (this.direction == 'e') ? 0 : this.segments.length;
+
+			var my_loop = function(i, track) {
 
 				// Check for a stop marker matching our car number.
-				for (var n = 0; n < this.segments[i].stopmarker.length; n++) {
-					if (this.segments[i].stopmarker[n].cars == num_cars) {
-						var my_distance = this.getDistanceToSegment(i) + this.segments[i].stopmarker[n].x;
+				for (var n = 0; n < track.segments[i].stopmarker.length; n++) {
+					if (track.segments[i].stopmarker[n].cars == num_cars) {
+						var my_distance = track.getDistanceToSegment(i) + track.segments[i].stopmarker[n].x;
 
 						// Return any markers we have not already passed.
 						if (get_next === true) {
-							if ((['n', 'e'].indexOf(this.direction) >= 0 && my_distance < x)
-								|| (['s', 'w'].indexOf(this.direction) >= 0 && my_distance > x)) {
+							if ((['n', 'e'].indexOf(track.direction) >= 0 && my_distance < x)
+								|| (['s', 'w'].indexOf(track.direction) >= 0 && my_distance > x)) {
 								return {
 									x: my_distance,
 									type: 'stop_marker'
@@ -258,6 +266,37 @@ var rtrack = (function() {
 									type: 'stop_marker'
 								}
 						}
+					}
+				}
+
+				return false;
+			};
+
+
+			// Otherwise, check for track stop marker.
+			if (this.direction == 'e') {
+				for (var i = my_segments[0].id; i >= 0; i--) {
+					if (typeof this.segments[i] === 'undefined'
+						|| typeof this.segments[i].stopmarker === 'undefined') {
+						continue;
+					}
+
+					var result = my_loop(i, this);
+					if (result !== false) {
+						return result;
+					}
+				}
+			}
+			else if (this.direction == 'w') {
+				for (var i = my_segments[0].id; i < this.segments.length; i++) {
+					if (typeof this.segments[i] === 'undefined'
+						|| typeof this.segments[i].stopmarker === 'undefined') {
+						continue;
+					}
+
+					var result = my_loop(i, this);
+					if (result !== false) {
+						return result;
 					}
 				}
 			}
@@ -275,7 +314,9 @@ var rtrack = (function() {
 		if (this.inTrackBounds(x)) {
 
 			// Get train front location.
-			var my_segments = this.getSegmentsByBounds(x, x+1);
+			var my_segments = (this.direction == 'e')
+				? this.getSegmentsByBounds(x, Math.floor(x+1))
+				: this.getSegmentsByBounds(x-1, Math.ceil(x));
 			if (typeof my_segments !== 'object' || my_segments === null || my_segments.length <= 0) {
 				throw new Error('Train Destination cannot calculate due to missing segments.');
 			}
@@ -292,9 +333,6 @@ var rtrack = (function() {
 					segment: my_segments[0].id,
 				}
 			}
-		}
-		else {
-			console.warn('Not in track.', x);
 		}
 
 		return false;

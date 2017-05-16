@@ -4,9 +4,9 @@ var system = null,
 	stations = [],
 	tracks = [],
   screen = {
-  	width: 20000, // 8092,
+  	width: 2000, // 8092,
   	height: 384,
-  	scale: .3,
+  	scale: .2,
   	segment_left: 1,
   };
 
@@ -65,28 +65,26 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.assembleFrame(tracks[0].getDistanceToSegment(screen.segment_left),0, screen.width, screen.height);
 
 		// Init train 0.
-		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 4);
+		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 6);
 		trains_east[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 4);
-//		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 4);
+		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 8);
 
 		// Add trains to track 0, at various positions.
 
-		system.addTrain(0, tracks[0].getDistanceToSegment(10),trains_east[0]);
-		system.addTrain(0, tracks[0].getDistanceToSegment(13),trains_east[1]);
-//		system.addTrain(0, tracks[0].getDistanceToSegment(6),trains_east[2]);
+		system.addTrain(0, tracks[0].getDistanceToSegment(12),trains_east[0]);
+		system.addTrain(0, tracks[0].getDistanceToSegment(18),trains_east[1]);
+		system.addTrain(0, tracks[0].getDistanceToSegment(24),trains_east[2]);
 
 /**
-		trains_west[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 8);
-		trains_west[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 8);
-		trains_west[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 8);
+		trains_west[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 4);
+		trains_west[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 6);
+		trains_west[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 6);
 
 		// Add trains to track 0, at various positions.
-		system.addTrain(1, 35000,trains_west[0]);
-		system.addTrain(1, 50000,trains_west[1]);
-		system.addTrain(1, 65000,trains_west[2]);
+		system.addTrain(1, tracks[1].getDistanceToSegment(0),trains_west[0]);
+		system.addTrain(1, tracks[1].getDistanceToSegment(5),trains_west[1]);
+//		system.addTrain(1, tracks[1].getDistanceToSegment(8),trains_west[2]);
 */
-
-
 		// Scale, when necessary.
 		// Mostly used for zooming out when debugging.
 		system.stage.scale.x = screen.scale;
