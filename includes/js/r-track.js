@@ -129,7 +129,7 @@ var rtrack = (function() {
 		console.log('   -> Train added. Setting segments as occupied.');
 
 		// Assign the train to these track segments.
-		this.setSegmentOccupied(my_segments, this.trains.length-1);
+		this.setSegmentOccupied(my_segments, train.id);
 
 		console.log('   -> Segments marked occupied:', my_segments);
 
@@ -536,9 +536,7 @@ var rtrack = (function() {
 			}
 		}
 
-		if (this.state_counter == 10) {
-
-//			console.log('Updating platforms and signal Visuals.');
+		if ( (this.state_counter % 10) === 0) {
 
 			// Update signals.
 			this.refreshSignals();
@@ -546,18 +544,21 @@ var rtrack = (function() {
 
 			// Update platforms.
 
+			if (this.state_counter === 20) {
+				// Update debug UI.
+				if (debug === true) {
+					this.debugUI();
+				}
 
-			// Update debug UI.
-			if (debug === true) {
-				this.debugUI();
+				// Reset count to zero.
+				this.state_counter = 0;
 			}
-
-			// Reset count to zero.
-			this.state_counter = 0;
+			this.state_counter++;
 		}
 		else {
 			this.state_counter++;
 		}
+
 
 		/**
 
@@ -596,7 +597,7 @@ var rtrack = (function() {
 				}
 
 				// Assign the train to these track segments.
-				this.setSegmentOccupied(my_segments, i);
+				this.setSegmentOccupied(my_segments, this.trains[i].id);
 			}
 		}
 
@@ -667,7 +668,7 @@ var rtrack = (function() {
 			this.container.addChild(message);
 		}
 
-		// Detemrine which segments fall within our view port.
+		// Determine which segments fall within our view port.
 		var my_segments = this.getSegmentsByBounds(x1,x2);
 
 		// Render each segment, accounting for offsets.

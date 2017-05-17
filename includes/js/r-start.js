@@ -1,3 +1,5 @@
+'use strict';
+
 var system = null,
 	trains_east = [],
 	trains_west = [],
@@ -6,8 +8,8 @@ var system = null,
   screen = {
   	width: 4096, // 8092,
   	height: 384,
-  	scale: .05,
-  	segment_left: 0,
+  	scale: .5,
+  	segment_left: 1,
   };
 
 
@@ -65,9 +67,9 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.assembleFrame(tracks[0].getDistanceToSegment(screen.segment_left),0, screen.width, screen.height);
 
 		// Init train 0.
-		trains_east[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 6);
-		trains_east[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 4);
-		trains_east[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 8);
+		trains_east[0] = new rtrain.Train(200, 'R142-left.png', 'R142-right.png', 6);
+		trains_east[1] = new rtrain.Train(201, 'R142-left.png', 'R142-right.png', 4);
+		trains_east[2] = new rtrain.Train(202, 'R142-left.png', 'R142-right.png', 8);
 
 		// Add trains to track 0, at various positions.
 
@@ -75,9 +77,9 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.addTrain(0, tracks[0].getDistanceToSegment(18),trains_east[1]);
 		system.addTrain(0, tracks[0].getDistanceToSegment(24),trains_east[2]);
 
-		trains_west[0] = new rtrain.Train(0, 'R142-left.png', 'R142-right.png', 4);
-		trains_west[1] = new rtrain.Train(1, 'R142-left.png', 'R142-right.png', 6);
-		trains_west[2] = new rtrain.Train(2, 'R142-left.png', 'R142-right.png', 6);
+		trains_west[0] = new rtrain.Train(800, 'R142-left.png', 'R142-right.png', 4);
+		trains_west[1] = new rtrain.Train(801, 'R142-left.png', 'R142-right.png', 6);
+		trains_west[2] = new rtrain.Train(802, 'R142-left.png', 'R142-right.png', 6);
 
 		// Add trains to track 0, at various positions.
 		system.addTrain(1, tracks[1].getDistanceToSegment(0),trains_west[0]);
