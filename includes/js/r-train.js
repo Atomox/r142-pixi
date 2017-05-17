@@ -2,7 +2,7 @@
 
 var rtrain = (function rTrainFactory() {
 
-  function Train(id, left, right, car_count) {
+  function Train(id, left, right, car_count, debug) {
     this.id = id;
     this.container = new PIXI.Container();
     this.status = 'waiting';
@@ -21,6 +21,17 @@ var rtrain = (function rTrainFactory() {
       medium: .2,
       high: .3
     };
+    this.debug = (debug === true) ? true : false;
+  }
+
+
+  Train.prototype.setDebug = function setDebug(debug) {
+    if (debug === true) {
+      this.debug = true;
+    }
+    else {
+      this.debug = false;
+    }
   }
 
 
@@ -463,24 +474,72 @@ var rtrain = (function rTrainFactory() {
    * @return {Pixi Item}
    *   Car pixi item to be added to the train container.
    */
-	function setupCar(file_name, car_num) {
+	function setupCar(file_name, car_num, train_id, reversed) {
 
     // Our train png.
-    var car_tex = PIXI.utils.TextureCache[file_name];
-    var my_car = new PIXI.Sprite(car_tex);
+    var my_car = new PIXI.Container(),
+      add_markings = true;
 
+    if (this.debug === true && car_num == 2) {
+      // Marker for start of track segment.
+      var my_car_body = new PIXI.Text('R' + train_id, {fontFamily: "Impact", fontSize: 100, fill: "black"});
+
+      add_markings = false;
+    }
+    else if (train_id == 999 && car_num == 2) {
+
+      // Marker for start of track segment.
+      var my_car_body = new PIXI.Text('SPECIAL', {fontFamily: "Impact", fontSize: 100, fill: "black"});
+
+      add_markings = false;
+    }
+    else {
+      var car_tex = PIXI.utils.TextureCache[file_name],
+          my_car_body = new PIXI.Sprite(car_tex);
+    }
+
+    // Set our x position, offset by the car number from the end of the train.
     var x = 0;
-
-    x = (((car_num-1) * my_car.width) + x);
+    x += this.container.width;
+    console.log(this.container.width);
 
     // Positioning.
     my_car.position.set(x,0);
 
-		my_car.vx = 0;
-		my_car.vy = 0;
+    my_car.vx = 0;
+    my_car.vy = 0;
 
-		return my_car;
+    my_car.addChild(my_car_body);
+
+    return (add_markings) ? setCarMarkings(my_car, car_num, train_id, reversed) : my_car;
 	}
+
+
+  function setCarDebug() {
+
+  }
+
+
+  function setCarMarkings(car, car_num, train_id, flip) {
+
+    // Marker for start of track segment.
+    var marking_l = new PIXI.Text(train_id + '' + car_num, {fontFamily: "Impact", fontSize: 10, fill: "white"}),
+      marking_r = new PIXI.Text(train_id + '' + car_num, {fontFamily: "Impact", fontSize: 10, fill: "white"});
+
+    if (flip === true) {
+      marking_l.position.set(23, 18);
+      marking_r.position.set(420, 18);
+    }
+    else {
+      marking_l.position.set(45, 18);
+      marking_r.position.set(442, 18);
+    }
+
+    car.addChild(marking_l);
+    car.addChild(marking_r);
+
+    return car;
+  }
 
 
   /**
@@ -497,10 +556,11 @@ var rtrain = (function rTrainFactory() {
     var car = [];
 
     for (var i = 0; i < this.car_count; i++) {
-        var car_img = (i >= (this.car_count/2)) ? this.images.right : this.images.left;
+        var reversed_car = (i >= (this.car_count/2)) ? true : false;
+        var car_img = (reversed_car) ? this.images.right : this.images.left;
 
-        //This code will run when the loader has finished loading the image.
-        car.push(setupCar.call(this, car_img, i+1));
+        // This code will run when the loader has finished loading the image.
+        car.push(setupCar.call(this, car_img, i+1, this.id, reversed_car));
         this.add(car[i]);
     }
 

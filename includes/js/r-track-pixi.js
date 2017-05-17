@@ -41,9 +41,50 @@ var rtrackpixi = (function() {
     return my_signal;
 	}
 
+	function renderSignalBox(status, x1, y1, x2, y2) {
+
+		var my_signal = new PIXI.Graphics();
+
+		// Set the position of this signal.
+		my_signal.position.x = x1;
+		my_signal.position.y = y1;
+
+		console.log('Adding new signal ...', status, 'signal pos:', x1, y1);
+
+		// Add a color and size. The rectangle is already placed on the map.
+		// We just need to draw it starting at it's placement above, so we only need
+		// length and width, hence only a single x and y.
+    return updateSignalBox(my_signal, status, x2-x1, y2-y1);
+	}
+
+	/**
+	 * Given a graphics item representing a signal rectangle, refresh it's status.
+	 * @param  {[type]} item [description]
+	 * @return {[type]}      [description]
+	 */
+	function updateSignalBox(item, status, x, y) {
+		item.clear();
+		var type = (status === -1)
+			? '0xf45f42' 
+			: (status === 0) 
+			? '0xf4e841' 
+			: '0x61f441';
+
+		item.beginFill(type);
+		// set the line style to have a width of 5 and set the color to red
+		item.lineStyle(0, 0x000000);
+
+		// draw a rectangle to 
+		item.drawRect(0, 0, x, y);
+
+		return item;
+	}
+
 	return {
 		stopMarker: renderStopMarker,
 		signal: renderSignal,
+		signalBox: renderSignalBox,
+		updateSignalBox: updateSignalBox,
 		signalTexture: getSignalTexture
 	};
 })();

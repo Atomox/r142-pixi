@@ -23,6 +23,16 @@ var rtrack = (function() {
 		this.height = height;
 		this.segments = [];
 		this.trains = [];
+		this.debug = (debug === true) ? true : false;
+	}
+
+	Track.prototype.setDebug = function setDebug(debug) {
+		if (debug === true) {
+			this.debug = true;
+		}
+		else {
+			this.debug = false;
+		}
 	}
 
 
@@ -653,19 +663,21 @@ var rtrack = (function() {
 		x1 = x1 + x_offset;
 		x2 = x2 + x_offset;
 
-		// Horizontal ruler.
-		for (var a = x1; a < x2; a += 500) {
-	    var message = new PIXI.Text(a, {fontFamily: "Helvetica", fontSize: 50, fill: "gray"});
-	    message.position.set(a, this.height - message.height);
-			this.container.addChild(message);
-			console.log("Rendering ruler at: ", a, this.height - message.height);
-		}
+		if (this.debug === true) {
+			// Horizontal ruler.
+			for (var a = x1; a < x2; a += 500) {
+		    var message = new PIXI.Text(a, {fontFamily: "Helvetica", fontSize: 50, fill: "gray"});
+		    message.position.set(a, this.height - message.height);
+				this.container.addChild(message);
+				console.log("Rendering ruler at: ", a, this.height - message.height);
+			}
 
-		// Vertical rules.
-		for (var b = 0; b < this.height; b += 20) {
-	    var message = new PIXI.Text((y1+b) + ', ' + b, {fontFamily: "Helvetica", fontSize: 12, fill: "gray"});
-	    message.position.set(0, b-message.height);
-			this.container.addChild(message);
+			// Vertical rules.
+			for (var b = 0; b < this.height; b += 20) {
+		    var message = new PIXI.Text((y1+b) + ', ' + b, {fontFamily: "Helvetica", fontSize: 12, fill: "gray"});
+		    message.position.set(0, b-message.height);
+				this.container.addChild(message);
+			}
 		}
 
 		// Determine which segments fall within our view port.
@@ -692,10 +704,12 @@ var rtrack = (function() {
 	 */
 	Track.prototype.renderSegment = function renderSegment(id, offset_x, offset_y) {
 
-    // Marker for start of track segment.
-    var message = new PIXI.Text(id, {fontFamily: "Helevetica", fontSize: 32, fill: "gray"});
-    message.position.set(offset_x, offset_y);
-    this.container.addChild(message);
+		if (this.debug) {
+	    // Marker for start of track segment.
+	    var message = new PIXI.Text(id, {fontFamily: "impact", fontSize: 100, fill: "0x000000"});
+	    message.position.set(offset_x, offset_y);
+	    this.container.addChild(message);
+		}
 
 		// Fetch and render all stop markers.
 		var markers = this.getStopMarker(id);
@@ -728,12 +742,27 @@ var rtrack = (function() {
 		if (typeof this.segments[sid].signals[signal_id] === 'undefined') {
 			return;
 		}
-		// Create new pixi item.
-		else if (typeof this.segments[sid].signals[signal_id].item === 'undefined') {
 
-			var x = this.segments[sid].signals[signal_id].position + offset_x;
-			x = (this.direction == 'e') ? x + 25 : x - 25;
-			var signal = this.renderer.signal(1, x, offset_y, this.direction);
+		// In debug mode, we the height of the signal box.
+		var signal_height = 10;
+
+		// Create new pixi item.
+		if (typeof this.segments[sid].signals[signal_id].item === 'undefined') {
+
+			// In debug mode, draw a signal rectangle.
+			if (this.debug === true) {
+				var x1 = this.segments[sid].signals[signal_id].position + offset_x,
+						x2 = this.segments[sid].length,
+						y1 = offset_y + 100,
+						y2 = y1 + signal_height;
+				var signal = this.renderer.signalBox(1, x1, y1, x2, y2);
+			}
+			// Otherwise, render the signal graphic.
+			else {
+				var x = this.segments[sid].signals[signal_id].position + offset_x;
+				x = (this.direction == 'e') ? x + 25 : x - 25;
+				var signal = this.renderer.signal(1, x, offset_y, this.direction);
+			}
 			this.segments[sid].signals[signal_id].item = signal;
 			this.container.addChild(signal);
 		}
@@ -742,8 +771,23 @@ var rtrack = (function() {
 			// Get signal status.
 			var status = this.getSignalStatus(null, sid);
 
-			// Update sprite.
-			this.segments[sid].signals[signal_id].item.texture = this.renderer.signalTexture(status, this.direction);
+			// In debug mode, update the rectangle.
+			if (this.debug === true) {
+
+				// Get length and width of the box, since we must redraw. We don't need
+				// to get the origin coordinates, however. We'll keep the signal object
+				// placed where it was (upper left corner). We just need
+				// length and width from that coord.
+				var x = this.segments[sid].length,
+						y = signal_height;
+
+				// Update graphics rectangle.
+				this.renderer.updateSignalBox(this.segments[sid].signals[signal_id].item, status, x, y);
+			}
+			else {
+				// Update sprite.
+				this.segments[sid].signals[signal_id].item.texture = this.renderer.signalTexture(status, this.direction);
+			}
 		}
 	}
 

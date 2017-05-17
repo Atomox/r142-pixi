@@ -5,18 +5,20 @@ var system = null,
 	trains_west = [],
 	stations = [],
 	tracks = [],
+  animate = true,
+  debug = true,
   screen = {
-  	width: 4096, // 8092,
+  	width: 20000, // 8092,
   	height: 384,
-  	scale: .5,
-  	segment_left: 1,
+  	scale: .25,
+  	segment_left: 0,
   };
 
 
 document.addEventListener("DOMContentLoaded",function() {
 
 	// Create a train system, and init Pixi.
-	system = new rsystem.System(screen.width, screen.height, true);
+	system = new rsystem.System(screen.width, screen.height, debug);
 
 	loadTexture(null, "images/station_basic.json")
 	.then(function(url) {
@@ -27,7 +29,6 @@ document.addEventListener("DOMContentLoaded",function() {
 	})
 	.then(function allThen(urls) {
 		/**
-		 
 
 		 @TODO
 
@@ -37,7 +38,7 @@ document.addEventListener("DOMContentLoaded",function() {
 		for (var i = 0; i < 2; i++) {
 			var my_y = (i === 0) ? 64 : 256;
 
-			initTracks(i, direction[(i%2)]);
+			initTracks(i, direction[(i%2)], debug);
 
 			// Add track to the system.
 			system.addTrack(i, 0, my_y, tracks[i]);
@@ -67,9 +68,9 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.assembleFrame(tracks[0].getDistanceToSegment(screen.segment_left),0, screen.width, screen.height);
 
 		// Init train 0.
-		trains_east[0] = new rtrain.Train(200, 'R142-left.png', 'R142-right.png', 6);
-		trains_east[1] = new rtrain.Train(201, 'R142-left.png', 'R142-right.png', 4);
-		trains_east[2] = new rtrain.Train(202, 'R142-left.png', 'R142-right.png', 8);
+		trains_east[0] = new rtrain.Train(200, 'R142-left.png', 'R142-right.png', 6, debug);
+		trains_east[1] = new rtrain.Train(201, 'R142-left.png', 'R142-right.png', 4, debug);
+		trains_east[2] = new rtrain.Train(202, 'R142-left.png', 'R142-right.png', 8, debug);
 
 		// Add trains to track 0, at various positions.
 
@@ -77,14 +78,16 @@ document.addEventListener("DOMContentLoaded",function() {
 		system.addTrain(0, tracks[0].getDistanceToSegment(18),trains_east[1]);
 		system.addTrain(0, tracks[0].getDistanceToSegment(24),trains_east[2]);
 
-		trains_west[0] = new rtrain.Train(800, 'R142-left.png', 'R142-right.png', 4);
-		trains_west[1] = new rtrain.Train(801, 'R142-left.png', 'R142-right.png', 6);
-		trains_west[2] = new rtrain.Train(802, 'R142-left.png', 'R142-right.png', 6);
+		trains_west[0] = new rtrain.Train(999, 'R142-left.png', 'R142-right.png', 4, debug);
+		trains_west[1] = new rtrain.Train(800, 'R142-left.png', 'R142-right.png', 4, debug);
+		trains_west[2] = new rtrain.Train(801, 'R142-left.png', 'R142-right.png', 4, debug);
+		trains_west[3] = new rtrain.Train(802, 'R142-left.png', 'R142-right.png', 4, debug);
 
 		// Add trains to track 0, at various positions.
 		system.addTrain(1, tracks[1].getDistanceToSegment(0),trains_west[0]);
-		system.addTrain(1, tracks[1].getDistanceToSegment(5),trains_west[1]);
-		system.addTrain(1, tracks[1].getDistanceToSegment(10),trains_west[2]);
+		system.addTrain(1, tracks[1].getDistanceToSegment(3),trains_west[1]);
+		system.addTrain(1, tracks[1].getDistanceToSegment(5),trains_west[2]);
+		system.addTrain(1, tracks[1].getDistanceToSegment(10),trains_west[3]);
 
 		// Scale, when necessary.
 		// Mostly used for zooming out when debugging.
@@ -98,18 +101,12 @@ document.addEventListener("DOMContentLoaded",function() {
 
 function gameLoop() {
 
-
-		/**
-		   
-
-
-		   @TODO
-
-
-
-		 */
-  requestAnimationFrame(gameLoop);
-//  requestAnimationFrame(function(){});
+	if (animate) {
+	  requestAnimationFrame(gameLoop);
+	}
+	else {
+	  requestAnimationFrame(function(){});
+	}
 
   if (!system.state()) {
     return false;
@@ -119,12 +116,13 @@ function gameLoop() {
 }
 
 
-function initTracks(id, direction) {
-	var min_length = 1000,
-		min_station_length = 3000,
+function initTracks(id, direction, debug) {
+	var min_length = 2000,
+		min_station_length = 4000,
 		min_station_third = Math.floor(min_station_length/3);
 	// Init track 0.
 	tracks[id] = new rtrack.Track(id, direction, 108);
+	tracks[id].setDebug(debug);
 	tracks[id].setTrackSegments([
 		{speed: 5, length: min_length},
 		{speed: 5, length: min_length},
