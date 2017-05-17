@@ -214,8 +214,6 @@ var rtrack = (function() {
 				x: x
 			});
 		}
-
-		console.log('STOP MARKERS FINAL:', this.segments[id].stopmarker);
 	}
 
 
@@ -653,15 +651,14 @@ var rtrack = (function() {
 		var my_segment = this.getSegmentsByBounds(x1,x1+1),
 				x_offset = 0;
 
-		// Make sure we could find our first visable segment. If found, the distance
-		// to that segment is the offset of x to the start of the viewport.
+		// Make sure we could find our first visable segment. If found,
+		// our coordinates should already account for the offset of the viewport,
+		// as well as the offset of the track's origin to the system origin.
 		if (typeof my_segment === 'object' && typeof my_segment[0] === 'object') {
 			if (typeof my_segment.distance === 'undefined') {
 				x_offset = my_segment[0].distance;
 			}
 		}
-		x1 = x1 + x_offset;
-		x2 = x2 + x_offset;
 
 		if (this.debug === true) {
 			// Horizontal ruler.
@@ -669,7 +666,6 @@ var rtrack = (function() {
 		    var message = new PIXI.Text(a, {fontFamily: "Helvetica", fontSize: 50, fill: "gray"});
 		    message.position.set(a, this.height - message.height);
 				this.container.addChild(message);
-				console.log("Rendering ruler at: ", a, this.height - message.height);
 			}
 
 			// Vertical rules.
@@ -713,7 +709,7 @@ var rtrack = (function() {
 
 		// Fetch and render all stop markers.
 		var markers = this.getStopMarker(id);
-		console.log(id,': ', markers.length, ' STOP MARKERS TO RENDER.', this.segments[id]);
+
 		for (var i = 0; i < markers.length; i++) {
 			console.log(this.id, ':', id, 'Stop marker at:', markers[i].x + offset_x, offset_y);
 			var marker = this.renderer.stopMarker(markers[i].cars, markers[i].x + offset_x, offset_y);
@@ -734,7 +730,6 @@ var rtrack = (function() {
 
 
 		 */
-
 	}
 
 

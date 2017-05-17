@@ -94,12 +94,20 @@ var rsystem = (function() {
 			throw new Error('viewport width/height must be positive integers.');
 		}
 
+		console.log('Setting the stage.....');
+		console.log('  - Original x/y:', system.stage.x, '/', system.stage.y);
+
+
 		// Move the stage to our passed origin.
 		system.stage.x -= x1;
 		system.stage.y -= y1;
 
+		console.log('  - Updated x/y:', system.stage.x, '/', system.stage.y);
+
 		var x2 = x1 + width,
 				y2 = y1 + height;
+
+		console.log('  - Rendering Tracks x/y:', x1, '/', y1, ' -> ', x2, '/', y2);
 
 		// Check for tracks at this position.
 		// If tracks, get start location for this track, then offset to start of track in viewport.
@@ -131,7 +139,7 @@ var rsystem = (function() {
 		// Find all tracks that overlap our viewport.
 		var my_tracks = this.findTracks(x1, x2, y1, y2);
 
-		console.log('Found', my_tracks.length, 'tracks to render.');
+		console.log('  - Found', my_tracks.length, 'tracks to render, from: ', x1,'/',y1,'->',x2,'/',y2);
 
 		// Assemble all tracks, and gather the containers for each track.
 		// Each container will include all track segments
@@ -140,8 +148,10 @@ var rsystem = (function() {
 			var my_track = this.tracks[my_tracks[i]];
 
 			// Render the container with normal coordinates, offset by the difference
-			// between track starting x,y and 
-			// 
+			// between track starting x,y and our system origin.
+			console.log('  - Render Track: ', my_track.id, '...')
+			console.log('  		- Position: ', my_track.position.x1,'/',my_track.position.y1);
+
 
 			// Offset coordinates for the track's starting position.
 			var my_track_container = my_track.track.render(

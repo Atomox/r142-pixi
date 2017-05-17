@@ -501,7 +501,6 @@ var rtrain = (function rTrainFactory() {
     // Set our x position, offset by the car number from the end of the train.
     var x = 0;
     x += this.container.width;
-    console.log(this.container.width);
 
     // Positioning.
     my_car.position.set(x,0);

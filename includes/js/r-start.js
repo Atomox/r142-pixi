@@ -8,10 +8,10 @@ var system = null,
   animate = true,
   debug = true,
   screen = {
-  	width: 20000, // 8092,
+  	width: 8092, // 8092,
   	height: 384,
-  	scale: .25,
-  	segment_left: 0,
+  	scale: 1,
+  	segment_left: 4,
   };
 
 
@@ -28,23 +28,14 @@ document.addEventListener("DOMContentLoaded",function() {
 		return Promise.all([urls[0], urls[1], loadTexture(null, "images/track_basic.json")]);
 	})
 	.then(function allThen(urls) {
-		/**
+		var direction = ['e', 'w'];
 
-		 @TODO
-
-		 */
-		var direction = ['e', 'w']; // ['e','w'];
-		// Create some tracks.
+		// Create some tracks, and add them to the system.
 		for (var i = 0; i < 2; i++) {
 			var my_y = (i === 0) ? 64 : 256;
-
 			initTracks(i, direction[(i%2)], debug);
-
-			// Add track to the system.
 			system.addTrack(i, 0, my_y, tracks[i]);
 		}
-
-
 
 		// Add up to four tracks.
 		// Layers: Background, platform, track, pillars, track, platform, pillars, platform, track foreground
@@ -65,7 +56,12 @@ document.addEventListener("DOMContentLoaded",function() {
 
 
 		// Assemble the system.
-		system.assembleFrame(tracks[0].getDistanceToSegment(screen.segment_left),0, screen.width, screen.height);
+		var screen_x = tracks[0].getDistanceToSegment(screen.segment_left),
+				screen_y = 0;
+		console.log('Render screen from x/y: (', screen_x, ' / ', screen_y, ') -> (', screen.width, ' / ', screen.height, ')');
+		console.log('===============================================================');
+		console.log('');
+		system.assembleFrame(screen_x, screen_y, screen.width, screen.height);
 
 		// Init train 0.
 		trains_east[0] = new rtrain.Train(200, 'R142-left.png', 'R142-right.png', 6, debug);
