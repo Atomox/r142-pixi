@@ -597,9 +597,11 @@ var rtrack = (function() {
 		for (var i = 0; i < this.trains.length; i++) {
 			if (typeof this.trains[i] !== 'undefined') {
 				var position = this.trains[i].getPosition();
+				var length = this.trains[i].getLength();
+
 
 				// Get all segments this train would occupy.
-				var my_segments = this.getSegmentsByBounds(position, position + this.trains[i].getLength());
+				var my_segments = this.getSegmentsByBounds(position, (position + length));
 				for (var j = 0; j < my_segments.length; j++) {
 					occupied_segments.push(my_segments[j].id);
 				}
@@ -815,7 +817,7 @@ var rtrack = (function() {
 				results = [];
 
 		for (var i = 0; i < this.segments.length; i++) {
-			if (rutils.intersection(length, (length+this.segments[i].length), x1, x2)) {
+			if (rutils.intersection(length, (length+this.segments[i].length), x1, x2) === true) {
 				results.push({
 					id: this.segments[i].id,
 					distance: length

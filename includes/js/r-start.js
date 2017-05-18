@@ -10,8 +10,8 @@ var system = null,
   screen = {
   	width: 8092, // 8092,
   	height: 384,
-  	scale: 1,
-  	segment_left: 4,
+  	scale: .1,
+  	segment_left: 0,
   };
 
 
@@ -69,7 +69,6 @@ document.addEventListener("DOMContentLoaded",function() {
 		trains_east[2] = new rtrain.Train(202, 'R142-left.png', 'R142-right.png', 8, debug);
 
 		// Add trains to track 0, at various positions.
-
 		system.addTrain(0, tracks[0].getDistanceToSegment(12),trains_east[0]);
 		system.addTrain(0, tracks[0].getDistanceToSegment(18),trains_east[1]);
 		system.addTrain(0, tracks[0].getDistanceToSegment(24),trains_east[2]);

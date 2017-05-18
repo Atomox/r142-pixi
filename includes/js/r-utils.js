@@ -21,6 +21,7 @@ var rutils = (function() {
 		return false;
 	}
 
+
 	/**
 	 * Check if a pair of coordinates intersect a second pair of coordinates
 	 * on a single axis.
@@ -35,23 +36,35 @@ var rutils = (function() {
 	 */
 	function checkForIntersection(x1, x2, a1, a2) {
 
-		// Can never be intersections.
-		if ((x1 > a2 || x2 < a1)) {
-			return false;
+		// Determine if coordinates are in ascending order. If not, swap them.
+		if (x2 < x1) {
+			var temp_x = x2;
+			x2 = x1;
+			x1 = temp_x;
+		}
+		if (a2 < a1) {
+			var temp_a = a2;
+			a2 = a1;
+			a1 = temp_a;
 		}
 
-		// 5, 21000
-		// 0, 8092
-
-		if ((x1 < a1 && x2 < a1) 				// Left
-			|| (x1 >= a1 && x2 <= a2) 		// Contained
-			|| (x1 <= a1 && x2 >= a2) 		// Overlap
-			|| (x1 >= a1 && x2 >= a2)) { 	// Right
+		if ((x1 <= a1 && x2 >= a1)  		// Overlap Left
+			|| (x1 <= a2 && x2 >= a2)  		// Overlap Right
+			|| (x1 >= a1 && x2 <= a2)) { 	// Contained
 			return true;
+		}
+
+
+		if (x1 < a1 && x2 < a1) { 	// left
+			return false;
+		}
+		if (x1 >= a1 && x2 >= a2) { 	// Right
+			return false;
 		}
 
 		return false;
 	}
+
 	function calculateStoppingDistance(velocity, decel_rate) {
 		var distance = 0;
 
@@ -76,11 +89,43 @@ var rutils = (function() {
 		return false;
 	}
 
+	function roundCoord(direction, x) {
+		switch (direction) {
+			case 'w':
+			case 'n':
+				return Math.ceil(x);
+				break;
+
+			case 'e':
+			case 's':
+				return Math.floor(x);
+				break;
+
+			default:
+				console.warn('Requesting rounding of coordinate, but direction does not match known list.');
+		}
+
+		return x;
+	}
+
 	return {
 		intersection: checkForIntersection,
 		boxIntersection: checkForBoxIntersection,
 		calculateStoppingDistance: calculateStoppingDistance,
-		passedDestination: passedDestination
+		passedDestination: passedDestination,
+		roundCoord: roundCoord
 	};
 
 })();
+
+// If we're running under Node...
+// (We do for running mocha tests, only)
+if(typeof exports !== 'undefined') {
+    module.exports = {
+    	intersection: rutils.intersection,
+			boxIntersection: rutils.boxIntersection,
+			calculateStoppingDistance: rutils.calculateStoppingDistance,
+			passedDestination: rutils.passedDestination,
+			roundCoord: rutils.roundCoord
+    }
+}
