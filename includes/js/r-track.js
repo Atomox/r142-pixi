@@ -12,7 +12,7 @@ var rtrack = (function() {
 	 * @param {int} height
 	 *   Fixed height of this track.
 	 */
-	function Track(id, direction, height) {
+	function Track(id, direction, height, debug) {
 		this.direction = direction.toLowerCase();
 		if (['n', 's', 'e', 'w'].indexOf(direction) === -1) {
 			console.warn('Invalid track direction:', direction);
@@ -27,12 +27,7 @@ var rtrack = (function() {
 	}
 
 	Track.prototype.setDebug = function setDebug(debug) {
-		if (debug === true) {
-			this.debug = true;
-		}
-		else {
-			this.debug = false;
-		}
+		this.debug = (debug === true) ? true : false;
 	}
 
 
@@ -309,6 +304,9 @@ var rtrack = (function() {
 				}
 			}
 		}
+		else {
+			console.error(' <!> Train', train_id, 'at position', x, 'is outside the track. Cannot get destination.');
+		}
 
 		// Otherwise check for end of track.
 		return {
@@ -437,18 +435,21 @@ var rtrack = (function() {
 			next_sid = sid - 1;
 			two_sid = sid - 2;
 		}
-		if (typeof this.segments[sid] === 'undefined') { return -1; }
-		else if (typeof this.segments[next_sid] === 'undefined') { return 0; }
-		else if (typeof this.segments[two_sid] === 'undefined') { return 0; }
 
-		// If we're in an occupied segment, or the next segment is occupied,
-		// then red signal.
-		if (this.segmentOccupied(sid, train_id) === true
-			|| this.segmentOccupied(next_sid, train_id) === true) {
+		if (typeof this.segments[sid] === 'undefined') { return -1; }
+
+		// If we're in an occupied segment, then red signal.
+		if (this.segmentOccupied(sid, train_id) === true) {
+			return -2;
+		}
+		// If the next segment is occupied, then red signal.
+		else if(typeof this.segments[next_sid] !== 'undefined'
+			&& this.segmentOccupied(next_sid, train_id) === true) {
 			return -1;
 		}
-		// If the two segments away is occupied, then yellow signal.
-		else if (this.segmentOccupied(two_sid, train_id) === true) {
+		// If two segments away is occupied, then yellow signal.
+		else if (typeof this.segments[two_sid] !== 'undefined'
+			&& this.segmentOccupied(two_sid, train_id) === true) {
 			return 0;
 		}
 
@@ -552,7 +553,7 @@ var rtrack = (function() {
 
 			// Update platforms.
 
-			if (this.state_counter === 20) {
+			if (this.state_counter === 10) {
 				// Update debug UI.
 				if (debug === true) {
 					this.debugUI();
@@ -740,8 +741,26 @@ var rtrack = (function() {
 			return;
 		}
 
+		if (typeof offset_x === 'undefined') {
+			offset_x = 0;
+		}
+		if (typeof offset_y === 'undefined') {
+			offset_y = 0;
+		}
+
 		// In debug mode, we the height of the signal box.
-		var signal_height = 10;
+		var signal_height = 10,
+				status = this.getSignalStatus(null, sid),
+				status_id = this.segments[sid].occupied;
+
+		if (status_id === false) {
+			status_id = '';
+		}
+		else {
+			status_id = 'r' + status_id;
+		}
+
+		status_id = '(s' + this.segments[sid].id + ') ' +  status_id;
 
 		// Create new pixi item.
 		if (typeof this.segments[sid].signals[signal_id].item === 'undefined') {
@@ -752,7 +771,8 @@ var rtrack = (function() {
 						x2 = this.segments[sid].length,
 						y1 = offset_y + 100,
 						y2 = y1 + signal_height;
-				var signal = this.renderer.signalBox(1, x1, y1, x2, y2);
+
+				var signal = this.renderer.signalBox(status, status_id, x1, y1, x2, y2);
 			}
 			// Otherwise, render the signal graphic.
 			else {
@@ -761,13 +781,14 @@ var rtrack = (function() {
 				var signal = this.renderer.signal(1, x, offset_y, this.direction);
 			}
 			this.segments[sid].signals[signal_id].item = signal;
-			this.container.addChild(signal);
+			this.container.addChild(signal.signal);
+
+			if (typeof signal.text !== 'undefined') {
+				this.container.addChild(signal.text);
+			}
 		}
 		// Just update the texture.
 		else {
-			// Get signal status.
-			var status = this.getSignalStatus(null, sid);
-
 			// In debug mode, update the rectangle.
 			if (this.debug === true) {
 
@@ -779,11 +800,12 @@ var rtrack = (function() {
 						y = signal_height;
 
 				// Update graphics rectangle.
-				this.renderer.updateSignalBox(this.segments[sid].signals[signal_id].item, status, x, y);
+				this.renderer.updateSignalBox(this.segments[sid].signals[signal_id].item.signal, status, x, y, status_id);
+				this.renderer.updateSignalText(this.segments[sid].signals[signal_id].item.text, status_id, status);
 			}
 			else {
 				// Update sprite.
-				this.segments[sid].signals[signal_id].item.texture = this.renderer.signalTexture(status, this.direction);
+				this.segments[sid].signals[signal_id].item.signal.texture = this.renderer.signalTexture(status, this.direction);
 			}
 		}
 	}
@@ -835,3 +857,10 @@ var rtrack = (function() {
 		Track: Track
 	};
 })();
+
+
+// If we're running under Node...
+// (We do for running mocha tests, only)
+if(typeof exports !== 'undefined') {
+    module.exports = rtrack;
+}

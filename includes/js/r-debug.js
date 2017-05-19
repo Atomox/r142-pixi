@@ -17,14 +17,14 @@ function debugSystemUI(track) {
 		my_div.innerHTML = stuff;
 
 		for (var i in track.trains) {
-//			console.log('>>>', track.trains[i].container);
+//			console.log('>>>', track.trains[i].getLength());
 			var my_train_div = getDebugElement('t'+track.id+'-v'+track.trains[i].id, my_div, 'col-4');
 
-			var my_content = '<h4>Train ' + track.trains[i].id + '</h4>';
-			my_content += 'Bound <i>' + dir[track.trains[i].direction] + '</i> to: <b>' + track.trains[i].destination.type + '</b> @ x: ' + track.trains[i].destination.x + '' +'<br>';
-			my_content += 'x/y:' + Math.floor(track.trains[i].container.x) + ' / ' + Math.floor(track.trains[i].container.y) + '<br>';
-			my_content += 'Ac/St: ' + track.trains[i].action.type + ' / ' + track.trains[i].status + '<br>';
-			my_content += 'vX:' + Math.floor(track.trains[i].container.vx) + ', vY:' + Math.floor(track.trains[i].container.vy) + ', ' +'<br>';
+			var my_content = '<h4>Train ' + track.trains[i].id + '</h4>'
+				+ 'Bound <i>' + dir[track.trains[i].direction] + '</i> to: <b>' + track.trains[i].destination.type + '</b> @ x: ' + track.trains[i].destination.x + '' +'<br>'
+				+ 'x:1-2/y:' + Math.floor(track.trains[i].container.x) + '-' + (track.trains[i].getLength() + Math.floor(track.trains[i].container.x)) + ' / ' + Math.floor(track.trains[i].container.y) + '<br>'
+				+ 'Ac/St: ' + track.trains[i].action.type + ' / ' + track.trains[i].status + '<br>'
+				+ 'vX:' + track.trains[i].container.vx + ', vY:' + track.trains[i].container.vy + ', ' +'<br>';
 
 			my_train_div.innerHTML = my_content;
 		}

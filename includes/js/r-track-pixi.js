@@ -36,25 +36,72 @@ var rtrackpixi = (function() {
 		my_signal.scale.x = .75;
 		my_signal.scale.y = .75;
 
-		console.log('Adding new signal ...', status, 'signal pos:', x, y);
-
-    return my_signal;
+    return {
+    	signal: my_signal
+    };
 	}
 
-	function renderSignalBox(status, x1, y1, x2, y2) {
+	function renderSignalBox(status, text, x1, y1, x2, y2) {
 
-		var my_signal = new PIXI.Graphics();
+		var my_signal = new PIXI.Graphics(),
+				my_text = renderSignalText(text, status, x1, x2, y1, y2);
 
 		// Set the position of this signal.
 		my_signal.position.x = x1;
 		my_signal.position.y = y1;
 
-		console.log('Adding new signal ...', status, 'signal pos:', x1, y1);
-
 		// Add a color and size. The rectangle is already placed on the map.
 		// We just need to draw it starting at it's placement above, so we only need
 		// length and width, hence only a single x and y.
-    return updateSignalBox(my_signal, status, x2-x1, y2-y1);
+    return {
+    	signal: updateSignalBox(my_signal, status, x2-x1, y2-y1),
+    	text: my_text
+    };
+	}
+
+	function renderSignalText(text, status, x1, x2, y1, y2) {
+		// create a text object that will be updated...
+    var signal_text = new PIXI.Text(text, {
+	        fontWeight: 'bold',
+	        fontSize: 45,
+	        fontFamily: 'Helvetica',
+	        fill: getStatusColor(status, true)
+	    });
+
+    signal_text.position.set(x1,y1);
+
+    return signal_text;
+	}
+
+	function updateSignalText(item, text, status) {
+    item.text = text;
+    item.style.fill = getStatusColor(status, true);
+
+    return item;
+	}
+
+	function getStatusColor(status, hex) {
+		var type = '';
+
+		switch (status) {
+			case -2:
+				type = '912222';
+				break;
+			case -1:
+				type = 'f45f42';
+				break;
+			case 0:
+				type = 'f4e841';
+				break;
+			case 1:
+				type = '61f441';
+				break;
+		}
+
+		if (hex === true) {
+			return '#' + type
+		}
+		return '0x' + type;
 	}
 
 	/**
@@ -62,13 +109,9 @@ var rtrackpixi = (function() {
 	 * @param  {[type]} item [description]
 	 * @return {[type]}      [description]
 	 */
-	function updateSignalBox(item, status, x, y) {
+	function updateSignalBox(item, status, x, y, signal_id) {
 		item.clear();
-		var type = (status === -1)
-			? '0xf45f42' 
-			: (status === 0) 
-			? '0xf4e841' 
-			: '0x61f441';
+		var type = getStatusColor(status, false);
 
 		item.beginFill(type);
 		// set the line style to have a width of 5 and set the color to red
@@ -85,6 +128,7 @@ var rtrackpixi = (function() {
 		signal: renderSignal,
 		signalBox: renderSignalBox,
 		updateSignalBox: updateSignalBox,
+		updateSignalText: updateSignalText,
 		signalTexture: getSignalTexture
 	};
 })();

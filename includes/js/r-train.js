@@ -244,6 +244,7 @@ var rtrain = (function rTrainFactory() {
       if (counter <= limit) { counter = limit; }
     }
 
+//    return rutils.round(counter,2);
     return counter;
   }
 

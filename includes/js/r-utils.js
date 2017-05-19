@@ -108,12 +108,18 @@ var rutils = (function() {
 		return x;
 	}
 
+	function round(value, decimals) {
+    return Number((value).toFixed(decimals));
+//	  return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+	}
+
 	return {
 		intersection: checkForIntersection,
 		boxIntersection: checkForBoxIntersection,
 		calculateStoppingDistance: calculateStoppingDistance,
 		passedDestination: passedDestination,
-		roundCoord: roundCoord
+		roundCoord: roundCoord,
+    round: round,
 	};
 
 })();
@@ -126,6 +132,7 @@ if(typeof exports !== 'undefined') {
 			boxIntersection: rutils.boxIntersection,
 			calculateStoppingDistance: rutils.calculateStoppingDistance,
 			passedDestination: rutils.passedDestination,
-			roundCoord: rutils.roundCoord
+			roundCoord: rutils.roundCoord,
+      round: round
     }
 }
