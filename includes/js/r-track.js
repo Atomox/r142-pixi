@@ -163,7 +163,32 @@ var rtrack = (function() {
 		if (typeof id === 'number') { id = [{id: id}]; }
 
 		for (var i = 0; i < id.length; i++) {
-			this.segments[id[i].id].occupied = train_id;
+
+
+
+
+/**
+ *
+ *  @todo 
+ *    Do this, and rewrite refresh signals, so that trains whom enter an already occupied signal can't steal ownership before it's clear. This if statement below will cause a "race condition", where an old signal will grow stale with an old train id, if a train occupied that segment at the same time. So, we must fix that before we can fix this.
+ *
+ *
+ *
+ *
+ *
+			if (this.segments[id[i].id].occupied === false) { }
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+
+
+				this.segments[id[i].id].occupied = train_id;
+
 		}
 	}
 
@@ -622,6 +647,30 @@ var rtrack = (function() {
 	Track.prototype.refreshSignals = function refreshSignals() {
 		var occupied_segments = [];
 
+
+		/**
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		   @TODO
+
+		     If a train no longer occupies a segment,
+		     we should unset it's old signals, so they can be occupied by new trains,
+		     without allowing those trains to prematurely claim a red signal as it's own.
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 */
+
 		for (var i = 0; i < this.trains.length; i++) {
 			if (typeof this.trains[i] !== 'undefined') {
 				var position = this.trains[i].getPosition();
@@ -631,6 +680,36 @@ var rtrack = (function() {
 				// Get all segments this train would occupy.
 				var my_segments = this.getSegmentsByBounds(position, (position + length));
 				for (var j = 0; j < my_segments.length; j++) {
+
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+					if (my_segments[j].occupied !== false
+						&& typeof this.trains[my_segments[j].occupied] !== 'undefined'
+						
+						&&
+
+							this.trains[my_segments[j].occupied]
+
+							STILL OCCUPIES THIS SEGMENT
+					) {
+						continue;
+					}
+  *
+  *
+  *
+  *
+  *
+  *
+  *
+  *
+  **/
+
 					occupied_segments.push(my_segments[j].id);
 				}
 
