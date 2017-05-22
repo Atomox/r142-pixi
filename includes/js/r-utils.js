@@ -127,12 +127,5 @@ var rutils = (function() {
 // If we're running under Node...
 // (We do for running mocha tests, only)
 if(typeof exports !== 'undefined') {
-    module.exports = {
-    	intersection: rutils.intersection,
-			boxIntersection: rutils.boxIntersection,
-			calculateStoppingDistance: rutils.calculateStoppingDistance,
-			passedDestination: rutils.passedDestination,
-			roundCoord: rutils.roundCoord,
-      round: round
-    }
+    module.exports = rutils;
 }

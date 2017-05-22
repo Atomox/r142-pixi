@@ -7,17 +7,18 @@ var system = null,
 	tracks = [],
   animate = true,
   debug = true,
-  num_tracks = 1,
+  num_tracks = 2,
   screen = {
-  	width: 8092, // 8092,
+  	width: 18092, // 8092,
   	height: 384,
-  	scale: .25,
+  	scale: .5,
   	segment_left: 0,
   },
   speed = {
-		slow: 5,
-		medium: 10,
-		high: 15
+		slow: 10,
+		medium: 15,
+		high: 25,
+		super: 50
 	};
 
 
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded",function() {
 
 	// Create a train system, and init Pixi.
 	system = new rsystem.System(screen.width, screen.height, debug);
+	system.initRenderer();
 
 	loadTexture(null, "images/station_basic.json")
 	.then(function(url) {
@@ -73,24 +75,28 @@ document.addEventListener("DOMContentLoaded",function() {
 		// Init train 0.
 		trains_east[0] = new rtrain.Train(200, 'R142-left.png', 'R142-right.png', 4, debug);
 		trains_east[1] = new rtrain.Train(201, 'R142-left.png', 'R142-right.png', 4, debug);
-		trains_east[2] = new rtrain.Train(202, 'R142-left.png', 'R142-right.png', 4, debug);
+		trains_east[2] = new rtrain.Train(999, 'R142-left.png', 'R142-right.png', 4, debug);
+		trains_east[3] = new rtrain.Train(202, 'R142-left.png', 'R142-right.png', 4, debug);
+		trains_east[4] = new rtrain.Train(203, 'R142-left.png', 'R142-right.png', 4, debug);
 
 		// Add trains to track 0, at various positions.
 		system.addTrain(0, tracks[0].getDistanceToSegment(4),trains_east[0]);
 		system.addTrain(0, tracks[0].getDistanceToSegment(10),trains_east[1]);
 		system.addTrain(0, tracks[0].getDistanceToSegment(15),trains_east[2]);
-/**
-		trains_west[0] = new rtrain.Train(999, 'R142-left.png', 'R142-right.png', 4, debug);
+		system.addTrain(0, tracks[0].getDistanceToSegment(20),trains_east[3]);
+		system.addTrain(0, tracks[0].getDistanceToSegment(25),trains_east[4]);
+
+		trains_west[0] = new rtrain.Train(998, 'R142-left.png', 'R142-right.png', 4, debug);
 		trains_west[1] = new rtrain.Train(800, 'R142-left.png', 'R142-right.png', 4, debug);
 		trains_west[2] = new rtrain.Train(801, 'R142-left.png', 'R142-right.png', 4, debug);
 		trains_west[3] = new rtrain.Train(802, 'R142-left.png', 'R142-right.png', 4, debug);
 
 		// Add trains to track 0, at various positions.
 		system.addTrain(1, tracks[1].getDistanceToSegment(0),trains_west[0]);
-		system.addTrain(1, tracks[1].getDistanceToSegment(3),trains_west[1]);
-		system.addTrain(1, tracks[1].getDistanceToSegment(5),trains_west[2]);
-		system.addTrain(1, tracks[1].getDistanceToSegment(10),trains_west[3]);
-*/
+		system.addTrain(1, tracks[1].getDistanceToSegment(4),trains_west[1]);
+		system.addTrain(1, tracks[1].getDistanceToSegment(8),trains_west[2]);
+		system.addTrain(1, tracks[1].getDistanceToSegment(12),trains_west[3]);
+
 		// Scale, when necessary.
 		// Mostly used for zooming out when debugging.
 		system.stage.scale.x = screen.scale;
@@ -128,8 +134,8 @@ function gameLoop() {
  * @return {[type]}           [description]
  */
 function initTracks(id, direction, speed, debug) {
-	var min_length = 500,
-		min_station_length = 2000,
+	var min_length = 2000,
+		min_station_length = 4000,
 		min_station_third = Math.floor(min_station_length/3);
 	// Init track 0.
 	tracks[id] = new rtrack.Track(id, direction, 108);
@@ -143,13 +149,13 @@ function initTracks(id, direction, speed, debug) {
 		{speed: speed.medium, length: min_station_third,
 			station: {id: 0, track: 0},
 			stop: [
-				[[10,8],6,4]
+				[[10,8], 5]
 			]
 		},
 		{speed: speed.medium, length: min_station_third,
 			station: {id: 0, track: 0},
 			stop: [
-				[[6,4], 6,4]
+				[[6,4], 0]
 			]
 		},
 		{speed: speed.slow, length: min_length},
@@ -160,11 +166,11 @@ function initTracks(id, direction, speed, debug) {
 		},
 		{speed: speed.medium, length: min_station_third,
 			station: {id: 0, track: 0},
-			stop: [[[10,8],6,4]]
+			stop: [[[10,8], 0]]
 		},
 		{speed: speed.medium, length: min_station_third,
 			station: {id: 0, track: 0},
-			stop: [[[6,4], 6,4]]
+			stop: [[[6,4], 50]]
 		},
 		{speed: speed.high, length: min_length},
 		{speed: speed.high, length: min_length},
@@ -174,7 +180,10 @@ function initTracks(id, direction, speed, debug) {
 		},
 		{speed: speed.medium, length: min_station_third,
 			station: {id: 0, track: 0},
-			stop: [[[10,8],6,4]]
+			stop: [
+				[[10,8],10],
+				[[6,4], 50]
+			]
 		},
 		{speed: speed.medium, length: min_station_third,
 			station: {id: 0, track: 0},

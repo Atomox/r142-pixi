@@ -490,7 +490,7 @@ var rtrain = (function rTrainFactory() {
     else if (train_id == 999 && car_num == 2) {
 
       // Marker for start of track segment.
-      var my_car_body = new PIXI.Text('SPECIAL', {fontFamily: "Impact", fontSize: 100, fill: "black"});
+      var my_car_body = new PIXI.Text('HiGloria', {fontFamily: "Impact", fontSize: 100, fill: "black"});
 
       add_markings = false;
     }

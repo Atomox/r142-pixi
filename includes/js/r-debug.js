@@ -22,9 +22,13 @@ function debugSystemUI(track) {
 
 			var my_content = '<h4>Train ' + track.trains[i].id + '</h4>'
 				+ 'Bound <i>' + dir[track.trains[i].direction] + '</i> to: <b>' + track.trains[i].destination.type + '</b> @ x: ' + track.trains[i].destination.x + '' +'<br>'
-				+ 'x:1-2/y:' + Math.floor(track.trains[i].container.x) + '-' + (track.trains[i].getLength() + Math.floor(track.trains[i].container.x)) + ' / ' + Math.floor(track.trains[i].container.y) + '<br>'
-				+ 'Ac/St: ' + track.trains[i].action.type + ' / ' + track.trains[i].status + '<br>'
-				+ 'vX:' + track.trains[i].container.vx + ', vY:' + track.trains[i].container.vy + ', ' +'<br>';
+				+ 'x:1-2/y:' + Math.floor(track.trains[i].container.x) + '-' + (track.trains[i].getLength() + Math.floor(track.trains[i].container.x)) + ' / ' + Math.floor(track.trains[i].container.y) + '<br>';
+
+			if (typeof track.trains[i].action !== 'undefined') {
+				my_content += 'Ac/St: ' + track.trains[i].action.type + ' / ' + track.trains[i].status + '<br>';
+			}
+
+				my_content += 'vX:' + track.trains[i].container.vx + ', vY:' + track.trains[i].container.vy + ', ' +'<br>';
 
 			my_train_div.innerHTML = my_content;
 		}

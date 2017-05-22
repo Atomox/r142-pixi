@@ -160,7 +160,7 @@ var rtrack = (function() {
 	 *   The ID of the train which is occupying the space.
 	 */
 	Track.prototype.setSegmentOccupied = function setSegmentOccupied(id, train_id) {
-		if (typeof id === 'number') { id = [id]; }
+		if (typeof id === 'number') { id = [{id: id}]; }
 
 		for (var i = 0; i < id.length; i++) {
 			this.segments[id[i].id].occupied = train_id;
@@ -320,24 +320,51 @@ var rtrack = (function() {
 		if (this.inTrackBounds(x)) {
 
 			// Get train front location.
-			var my_segments = (this.direction == 'e')
+			var is_ne = (['n','e'].indexOf(this.direction) >= 0) ? true : false,
+					target_segment;
+
+			// Find our closest approaching segment.
+			var	this_segment = (is_ne)
 				? this.getSegmentsByBounds(x, Math.floor(x+1))
 				: this.getSegmentsByBounds(x-1, Math.ceil(x));
-			if (typeof my_segments !== 'object' || my_segments === null || my_segments.length <= 0) {
+
+			// Find our next closest approaching segment.
+			var next_segment = (is_ne)
+				? this_segment[0].id - 1
+				: this_segment[0].id + 1;
+
+			// Make sure we have a closest segment, or fail.
+			if (typeof this_segment !== 'object' || this_segment === null || this_segment.length <= 0) {
 				throw new Error('Train Destination cannot calculate due to missing segments.');
+			}
+
+			// Closest segment returned inside an array.
+			this_segment = this_segment[0];
+
+			// Is this segment's signal red?
+			if (this.getSignalStatus(train_id, this_segment.id) < 0) {
+				target_segment = this.segments[this_segment];
+			}
+			else if (typeof this.segments[next_segment] !== 'undefined'
+				&& this.getSignalStatus(train_id, this.segments[next_segment].id) < 0) {
+				target_segment = this.segments[next_segment];
 			}
 
 			// Check signal. If red, stop in this segment,
 			// as next segment will be occupied.
-			if (this.getSignalStatus(train_id, my_segments[0].id) === -1) {
-
+			if (typeof target_segment !== 'undefined' && typeof target_segment.id !== 'undefined') {
+				var x = this.getDistanceToSegment(target_segment.id);
+				x += (is_ne) 
+					? target_segment.distance : 0;
 				// Distance to start for n/e, otherwise distance to end of segment.
 				return {
-					x: this.getDistanceToSegment(my_segments[0].id) + (['n','e'].indexOf(this.direction) >= 0) 
-						? my_segments[0].distance : 0,
+					x: x,
 					type: 'signal',
-					segment: my_segments[0].id,
+					segment: target_segment.id,
 				}
+			}
+			else {
+//				console.log('No Red Signal in Sight for', train_id, '!');
 			}
 		}
 
@@ -553,7 +580,7 @@ var rtrack = (function() {
 
 			// Update platforms.
 
-			if (this.state_counter === 10) {
+			if (this.state_counter === 20) {
 				// Update debug UI.
 				if (debug === true) {
 					this.debugUI();

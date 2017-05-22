@@ -6,24 +6,40 @@ var rsystem = (function() {
 		this.stations = [];
 		this.trains = [];
 		this.debug = false;
+		this.width = width;
+		this.height = height;
 
 		if (typeof debug !== 'undefined' && debug === true) {
 			this.debug = true;
 		}
+	}
+
+
+	/**
+	 * Initialize visual renderer.
+	 */
+	System.prototype.initRenderer = function initRenderer() {
+		// Init our Pixi renderer, and viewport.
+		this.initPixiRenderer(this.width, this.height);
 
 		// Create a container object called the `stage`, and a renderer.
 		this.stage = new PIXI.Container();
-
-		// Init our Pixi renderer, and viewport.
-		this.initPixiRenderer(width, height);
 	}
 
+
+	/**
+	 * Initialize the PIXI renderer suite.
+	 */
 	function initPixi() {
 		var type = "WebGL";
 	  if (!PIXI.utils.isWebGLSupported()){ type = "canvas" }
 	  PIXI.utils.sayHello(type);
 	}
 
+
+	/**
+	 * Initialize the PIXI graphics engine, and setup the system window/screen.
+	 */
 	System.prototype.initPixiRenderer = function initPixiRenderer(width, height) {
 	  initPixi();
 
@@ -40,6 +56,18 @@ var rsystem = (function() {
 	  document.body.appendChild(this.renderer.view);
 	}
 
+
+	/**
+	 * Add a track object to the system.
+	 * @param {string/int} id
+	 *   ID of the system.
+	 * @param {int} x
+	 *   Origin (left) position within the system where this track start.
+	 * @param {int} y
+	 *   Origin (top) position within the system where this track starts.
+	 * @param {object} Track
+	 *   An already initialized track object.
+	 */
 	System.prototype.addTrack = function addTrack(id, x,y, Track) {
 		this.tracks[id] = {
 			id: id,
@@ -54,6 +82,11 @@ var rsystem = (function() {
 	}
 
 
+	/**
+
+	 			@todo
+
+	 */
 	System.prototype.addStation = function addStation(id, x,y, Station){
 		this.station[id] = {
 			id: id,
@@ -77,8 +110,16 @@ var rsystem = (function() {
 	}
 
 
+	/**
+	 * Update the state for the current iteration.
+	 *
+	 * This is the "game loop" called once per cycle.
+	 *
+	 * this updates all asset objects attached to them, as well.
+	 */
 	System.prototype.state = function state() {
 
+		// Update each track attached to our system.
 		for (var i = 0; i < this.tracks.length; i++) {
 			if (typeof this.tracks[i].track !== 'undefined') {
 				this.tracks[i].track.state(this.debug);
@@ -88,6 +129,21 @@ var rsystem = (function() {
 	  return true;
 	}
 
+
+	/**
+	 * Assemble the "stage", rendering each asset in the system. This is to
+	 * initialize things which won't change unless the stage/screen moves.
+	 *
+	 * @param  {int} x1
+	 *   The left-most position of the screen, relative to the left-most position
+	 *   of the system. This is the offset from the left of the system to the
+	 *   start of the screen.
+	 * @param  {int} y1
+	 *   The top-most position of the screen, relative to the top-most position of the system.
+	 * @param  {[type]} width  [description]
+	 * @param  {[type]} height [description]
+	 * @return {[type]}        [description]
+	 */
 	System.prototype.assembleFrame = function render(x1,y1, width, height) {
 
 		if (width <= 0 || height <= 0) {
@@ -201,3 +257,10 @@ var rsystem = (function() {
 	};
 
 })();
+
+
+// If we're running under Node...
+// (We do for running mocha tests, only)
+if(typeof exports !== 'undefined') {
+    module.exports = rsystem;
+}
