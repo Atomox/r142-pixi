@@ -1,6 +1,7 @@
 var assert = require('assert');
 
-var rtrack = require('../includes/js/r-track.js');
+var rtrack = require('../includes/js/r-track.js'),
+		rutils = require('../includes/js/r-utils.js');
 
 describe('Track', function() {
 	describe('Basic', function() {
@@ -148,18 +149,36 @@ describe('Track', function() {
 
 		it ('Should not lose trains when we refresh signals.');
 
-		it ('Should not allow us to occupy the signal space if another train already occupies this space.');
+		it ('Should not allow us to occupy the signal space if another train already occupies this space.', function() {
+			var track = initTracks(0, 'e', false);
+			track.setSegmentOccupied(0, 1234);
+			assert.equal(-2, track.getSignalStatus(111,0));
+			track.setSegmentOccupied(0, 2234);
+			assert.equal(false, track.segmentOccupied(0, 1234))
+			assert.equal(true, track.segmentOccupied(0, 2234))
+		});
 
 	});
 
 	describe('Destinations', function() {});
 
-/**
+
 	describe('Helper Functions', function() {
-		describe('getDistanceToSegment()');
-		describe('getSegmentsByBounds()');
+		describe('getDistanceToSegment()', function() {
+			it ('Should get the distance to segment 0.', function() {
+				var track = initTracks(0, 'e', false);
+				assert.equal(0,track.getDistanceToSegment(0));
+			});
+			it ('Should get distance to a later segment.', function() {
+				var track = initTracks(0, 'e', false);
+				assert.equal(4000,track.getDistanceToSegment(2));
+			});
+		});
+		describe('getSegmentsByBounds()', function() {
+			//var track = initTracks(0, 'e', false);
+			//console.log(track.getSegmentsByBounds(0,2000));
+		});
 	});
-*/
 });
 
 
