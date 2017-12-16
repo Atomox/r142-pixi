@@ -3,6 +3,9 @@
 # prepping to be run in the compose file.
 FROM node:9.1.0
 
+# Install forever
+RUN npm install forever -g
+
 # Create a source directory
 RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
@@ -10,9 +13,6 @@ WORKDIR /usr/src/app
 # Install dependencies
 COPY package.json .
 RUN npm install
-
-# Install forever
-RUN npm install forever -g
 
 # Install mocha
 RUN npm install mocha --global
